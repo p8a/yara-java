@@ -3,6 +3,18 @@ package com.github.plusvic.yara.embedded;
 import com.github.plusvic.yara.*;
 import org.fusesource.hawtjni.runtime.Callback;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Enumeration;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
 import static com.github.plusvic.yara.Preconditions.checkArgument;
 import static com.github.plusvic.yara.Preconditions.checkState;
 
@@ -10,6 +22,8 @@ import static com.github.plusvic.yara.Preconditions.checkState;
  * Yara compiler
  */
 public class YaraCompilerImpl implements YaraCompiler {
+    private static final Logger LOGGER = Logger.getLogger(YaraCompilerImpl.class.getName());
+
     /**
      * Native compilation callback wrapper
      */
@@ -85,8 +99,70 @@ public class YaraCompilerImpl implements YaraCompiler {
      * @param namespace
      * @return
      */
-    public boolean addRules(String content, String namespace) {
-        return 0 == library.compilerAddString(peer, content, namespace);
+    public void addRulesContent(String content, String namespace) {
+        int ret  = library.compilerAddString(peer, content, namespace);
+        if (ret != ErrorCode.SUCCESS.getValue()) {
+            throw new YaraException(ret);
+        }
+    }
+
+    /** Add rules file
+     * @param filePath
+     * @param fileName
+     * @param namespace
+     */
+    public void addRulesFile(String filePath, String fileName, String namespace) {
+        int ret  = library.compilerAddFile(peer, filePath, namespace, fileName);
+        if (ret != ErrorCode.SUCCESS.getValue()) {
+            throw new YaraException(ret);
+        }
+    }
+
+    /**
+     * Add rules from package
+     * @param packagePath
+     * @param namespace
+     */
+    @Override
+    public void addRulesPackage(String packagePath, String namespace) {
+        checkArgument(!Utils.isNullOrEmpty(packagePath));
+        checkArgument(Files.exists(Paths.get(packagePath)));
+
+        LOGGER.fine(String.format("Loading package: %s", packagePath));
+
+        try (ZipFile zf = new ZipFile(packagePath)) {
+
+            for (Enumeration e = zf.entries(); e.hasMoreElements();) {
+                ZipEntry entry = (ZipEntry) e.nextElement();
+
+                // Check yara rule
+                String iname = entry.getName().toLowerCase();
+                if (!(iname.endsWith(".yar") || iname.endsWith(".yara") || iname.endsWith(".yr"))) {
+                    continue;
+                }
+
+                // Read content
+                LOGGER.fine(String.format("Loading package entry: %s", entry.getName()));
+                StringBuilder content = new StringBuilder();
+
+                try (BufferedReader bsr = new BufferedReader(new InputStreamReader(zf.getInputStream(entry)))) {
+                    String line;
+
+                    while (null != (line = bsr.readLine())) {
+                        content.append(line);
+                    }
+                }
+
+                // Add content
+                addRulesContent(content.toString(), namespace);
+            }
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException("Failed to load rule package", ioe);
+        }
+        catch(YaraException yex) {
+            throw yex;
+        }
     }
 
     /**

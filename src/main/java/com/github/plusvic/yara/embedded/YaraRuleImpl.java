@@ -31,6 +31,29 @@ public class YaraRuleImpl implements YaraRule {
     }
 
     /**
+     * Rule tags
+     *
+     * @return
+     */
+    public Iterator<String> getTags() {
+        return new GenericIterator<String>() {
+            private long index = library.ruleTags(peer);
+
+            @Override
+            protected String getNext() {
+                long last = index;
+                index = library.ruleTagNext(index);
+
+                if (index == 0 || last == 0) {
+                    return null;
+                }
+
+                return library.tagString(last);
+            }
+        };
+    }
+
+    /**
      * Rule metadata
      *
      * @return

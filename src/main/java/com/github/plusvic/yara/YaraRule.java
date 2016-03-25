@@ -14,6 +14,12 @@ public interface YaraRule {
     String getIdentifier();
 
     /**
+     * Rule tags
+     * @return
+     */
+    Iterator<String> getTags();
+
+    /**
      * Rule metadata
      *
      * @return

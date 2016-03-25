@@ -52,7 +52,7 @@ public class YaraOutputProcessorTest {
             }
         };
 
-        String value = "HelloWorld []";
+        String value = "HelloWorld [] []";
 
         YaraOutputProcessor processor = new YaraOutputProcessor(callback);
         processor.onStart();
@@ -66,6 +66,40 @@ public class YaraOutputProcessorTest {
     }
 
     @Test
+    public void testRuleTags() {
+        final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
+
+        YaraScanCallback callback = new YaraScanCallback() {
+            @Override
+            public void onMatch(YaraRule rule) {
+                captureRule.set(rule);
+            }
+        };
+
+        String value = "HelloWorld [One,Two,Three] []";
+
+        YaraOutputProcessor processor = new YaraOutputProcessor(callback);
+        processor.onStart();
+        processor.onLine(value);
+        processor.onComplete();
+
+        YaraRule rule = captureRule.get();
+
+        assertNotNull(rule);
+        assertEquals("HelloWorld", rule.getIdentifier());
+        assertFalse(rule.getStrings().hasNext());
+
+        Iterator<String> tags = rule.getTags();
+        assertEquals("One",tags.next());
+        assertEquals("Two",tags.next());
+        assertEquals("Three",tags.next());
+        assertFalse(tags.hasNext());
+
+        Iterator<YaraMeta> metas = rule.getMetadata();
+        assertFalse(metas.hasNext());
+    }
+
+    @Test
     public void testRuleMeta() {
         final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
 
@@ -76,7 +110,7 @@ public class YaraOutputProcessorTest {
             }
         };
 
-        String value = "HelloWorld [name=\"InstallsDriver\",description=\"The file attempted to install a driver\"]";
+        String value = "HelloWorld [] [name=\"InstallsDriver\",description=\"The file attempted to install a driver\"]";
 
         YaraOutputProcessor processor = new YaraOutputProcessor(callback);
         processor.onStart();
@@ -113,7 +147,7 @@ public class YaraOutputProcessorTest {
             }
         };
 
-        String value = "HelloWorld [string=\"String\",number=1,boolean=true]";
+        String value = "HelloWorld [] [string=\"String\",number=1,boolean=true]";
 
         YaraOutputProcessor processor = new YaraOutputProcessor(callback);
         processor.onStart();
@@ -154,7 +188,7 @@ public class YaraOutputProcessorTest {
             }
         };
 
-        String value = "HelloWorld [name=\"InstallsDriver\"," +
+        String value = "HelloWorld [One] [name=\"InstallsDriver\"," +
                 "description=\"The file attempted to install a driver\"," +
                 "categories=\"Process \\\",= Creation\"," +
                 "type=\"external\"," +
@@ -168,6 +202,10 @@ public class YaraOutputProcessorTest {
         processor.onComplete();
 
         YaraRule rule = captureRule.get();
+
+        Iterator<String> tags = rule.getTags();
+        assertEquals("One", tags.next());
+        assertFalse(tags.hasNext());
 
         assertNotNull(rule);
         assertEquals("HelloWorld", rule.getIdentifier());
@@ -218,10 +256,10 @@ public class YaraOutputProcessorTest {
         };
 
         String[] lines = new String[] {
-                "HelloWorld [name=\"InstallsDriver\",description=\"The file attempted to install a driver\"] test.bla",
+                "HelloWorld [] [name=\"InstallsDriver\",description=\"The file attempted to install a driver\"] test.bla",
                 "0xf:$a: Hello World",
                 "0x59:$a: Hello World",
-                "HereIsATest [internal=true,value=123] test.bla",
+                "HereIsATest [] [internal=true,value=123] test.bla",
                 "0x20:$a: here",
                 "0x52:$a: here"
         };

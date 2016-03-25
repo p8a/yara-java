@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
  */
 @NotThreadSafe
 public class YaraScannerImplTest {
-    private static final String YARA_RULE_HELLO = "rule HelloWorld\n"+
+    private static final String YARA_RULE_HELLO = "rule HelloWorld : Hello World\n"+
             "{\n"+
             "\tmeta:\n" +
             "	my_identifier_1 = \"Some string data\"\n" +
@@ -90,7 +90,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRules(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -123,6 +123,7 @@ public class YaraScannerImplTest {
                 assertEquals("HelloWorld", v.getIdentifier());
                 assertMetas(v.getMetadata());
                 assertStrings(v.getStrings());
+                assertTags(v.getTags());
 
                 match.set(true);
             }
@@ -131,7 +132,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRules(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -171,7 +172,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRules(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -221,5 +222,13 @@ public class YaraScannerImplTest {
         assertFalse(matches.hasNext());
 
         assertFalse(strings.hasNext());
+    }
+
+    private void assertTags(Iterator<String> tags) {
+        assertNotNull(tags);
+
+        assertEquals("Hello", tags.next());
+        assertEquals("World", tags.next());
+        assertFalse(tags.hasNext());
     }
 }

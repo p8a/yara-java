@@ -15,12 +15,44 @@ cast_jstring(JNIEnv *env, const char * v) {
             (*env)->NewStringUTF(env, v);
 }
 
+/*
+ * Rule indentifier
+ */
 static jstring
 yara_rule_identifier(JNIEnv *env, void *v) {
     return !v ? NULL :
             cast_jstring(env, ((YR_RULE*)v)->identifier);
 }
 
+/*
+ *  Tag iteration
+ */
+static void*
+yara_rule_tags(JNIEnv *env, void *v) {
+    return !v ? 0 : (void *)((YR_RULE*)v)->tags;
+}
+
+static void*
+yara_rule_tag_next(JNIEnv *env, void *v) {
+    char *n = v;
+
+    if (!n || *n == '\0') {
+        return 0;
+    }
+
+    for ( ; *n != '\0'; ++n);
+    return n + 1;
+}
+
+static jstring
+yara_tag_string(JNIEnv *env, void *v) {
+    return !v ? NULL :
+            cast_jstring(env, (char*)v);
+}
+
+/*
+ *  Metadata iteration
+ */
 static void*
 yara_rule_metas(JNIEnv *env, void *v) {
     return !v ? 0 : ((YR_RULE*)v)->metas;
@@ -58,6 +90,9 @@ yara_meta_integer(JNIEnv *env, void *v) {
     return !v ? 0 : ((YR_META*)v)->integer;
 }
 
+/*
+ *  Strings iteration
+ */
 static void*
 yara_rule_strings(JNIEnv *env, void *v) {
     return !v ? 0 : ((YR_RULE*)v)->strings;
@@ -117,6 +152,25 @@ yara_match_value(JNIEnv *env, void *v) {
     }
 
     return value;
+}
+
+/*
+ *  Compilation
+ */
+static int
+yara_compiler_add_file(JNIEnv *env, void *compiler, const char *path, const char *ns, const char *file_name) {
+    FILE *fp = fopen(path, "r");
+    int ret = 0;
+
+    if (fp) {
+        ret = yr_compiler_add_file((YR_COMPILER*)compiler, fp, ns, file_name);
+        fclose(fp);
+    }
+    else {
+        ret = 3;
+    }
+
+    return ret;
 }
 
 #ifdef __cplusplus

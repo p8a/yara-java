@@ -1,4 +1,4 @@
-rule HelloWorld {
+rule HelloWorld : Hello World {
   meta:
     name = "InstallsDriver"
     description = "The file attempted to install a driver"

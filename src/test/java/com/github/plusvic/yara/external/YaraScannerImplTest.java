@@ -69,7 +69,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(compileCallback);
-            compiler.addRules(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -110,7 +110,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(compileCallback);
-            compiler.addRules(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -150,7 +150,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(compileCallback);
-            compiler.addRules(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);

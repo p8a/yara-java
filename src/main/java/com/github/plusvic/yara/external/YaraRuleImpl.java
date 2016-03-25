@@ -9,6 +9,7 @@ import static com.github.plusvic.yara.Preconditions.checkArgument;
 
 public class YaraRuleImpl implements YaraRule {
     private String identifier;
+    private List<String> tags = new ArrayList<>();
     private List<YaraMeta> metas = new ArrayList<>();
     private List<YaraString> strings = new ArrayList<>();
 
@@ -16,6 +17,10 @@ public class YaraRuleImpl implements YaraRule {
         checkArgument(!Utils.isNullOrEmpty(identifier));
 
         this.identifier = identifier;
+    }
+
+    public void addTag(String tag) {
+        this.tags.add(tag);
     }
 
     public void addMeta(YaraMeta meta) {
@@ -29,6 +34,11 @@ public class YaraRuleImpl implements YaraRule {
     @Override
     public String getIdentifier() {
         return identifier;
+    }
+
+    @Override
+    public Iterator<String> getTags() {
+        return tags.iterator();
     }
 
     @Override

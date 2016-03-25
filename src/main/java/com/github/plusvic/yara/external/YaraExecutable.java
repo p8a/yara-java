@@ -54,7 +54,7 @@ public class YaraExecutable {
 
     private String[] getCommandLine(Path target) {
         List<String> args = new ArrayList<>();
-        //args.add("-g");  // tags
+        args.add("-g");  // tags
         args.add("-m"); // meta
         args.add("-s"); // strings
 

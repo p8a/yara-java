@@ -72,6 +72,17 @@ public class YaraLibrary implements Closeable {
         return yr_compiler_add_string(compiler, rules, namespace);
     }
 
+    private final native int yara_compiler_add_file(
+            JNIEnv evn,
+            @JniArg(cast = "YR_COMPILER *") long compiler,
+            String filePath,
+            String namespace,
+            String fileName);
+    public int compilerAddFile(long compiler, String filePath, String namespace, String fileName) {
+        Preconditions.checkState(library != null);
+        return yara_compiler_add_file(null, compiler, filePath, namespace, fileName);
+    }
+
     private final native int yr_compiler_get_rules(
             @JniArg(cast = "YR_COMPILER*") long compiler,
             @JniArg(cast = "YR_RULES**") long[] rules);
@@ -119,6 +130,17 @@ public class YaraLibrary implements Closeable {
         return yara_rule_identifier(null, pv);
     }
 
+    private final native long yara_rule_tags(JNIEnv env, @JniArg(cast = "void*") long pv);
+    public long ruleTags(long pv) {
+        Preconditions.checkState(library != null);
+        return yara_rule_tags(null, pv);
+    }
+    private final native long yara_rule_tag_next(JNIEnv env, @JniArg(cast = "void*") long pv);
+    public long ruleTagNext(long pv) {
+        Preconditions.checkState(library != null);
+        return yara_rule_tag_next(null, pv);
+    }
+
     private final native long yara_rule_metas(JNIEnv env, @JniArg(cast = "void*") long pv);
     public long ruleMetas(long pv) {
         Preconditions.checkState(library != null);
@@ -141,6 +163,15 @@ public class YaraLibrary implements Closeable {
     public long ruleStringNext(long pv) {
         Preconditions.checkState(library != null);
         return yara_rule_string_next(null, pv);
+    }
+
+    /*
+        Tags
+     */
+    private final native String yara_tag_string(JNIEnv env, @JniArg(cast = "void*") long pv);
+    public String tagString(long pv) {
+        Preconditions.checkState(library != null);
+        return yara_tag_string(null, pv);
     }
 
     /*

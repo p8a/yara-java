@@ -64,10 +64,33 @@ class YaraOutputProcessor {
 
         LineTokenizer tokenizer = new LineTokenizer(line);
 
-        // Identifier first, metadata second. Cannot be null or empty and
+        // Identifier first, tags second. Cannot be null or empty and
         String ruleId = checkTokenType(tokenizer.next(LineTokenizer.TokenType.IDENTIFIER),
                 LineTokenizer.TokenType.IDENTIFIER);
         rule = new YaraRuleImpl(ruleId);
+
+        // Move to the start of tags
+        checkTokenType(tokenizer.next(LineTokenizer.TokenType.LFTSQ_BRACKET),
+                LineTokenizer.TokenType.LFTSQ_BRACKET);
+
+        boolean ended = false;
+
+        while (!ended) {
+            Iterator<LineTokenizer.Token> tokens = tokenizer.nextUntil(LineTokenizer.TokenType.COMMA,
+                    LineTokenizer.TokenType.RGTSQ_BRACKET)
+                    .iterator();
+
+            LineTokenizer.Token temp = tokens.next();
+            if (temp.Type == LineTokenizer.TokenType.RGTSQ_BRACKET) {
+                break;
+            }
+
+            rule.addTag(temp.Value);
+
+            temp = tokens.next();
+            ended = (temp.Type == LineTokenizer.TokenType.EMPTY || temp.Type == LineTokenizer.TokenType.RGTSQ_BRACKET);
+        }
+
 
         // Move the start of metadata, there should be only one pair of [] since we print
         // only metadata (change this code is for example we start printing tags)
@@ -77,7 +100,7 @@ class YaraOutputProcessor {
         // Now all gets messy because yara does not write the output properly formatted,
         // escaped quotes are printed unescaped so \" becomes " in the output. We expect
         // pairs of id=(number | string | boolean)
-        boolean ended = false;
+        ended = false;
 
         while (!ended) {
             Iterator<LineTokenizer.Token> tokens = tokenizer.nextUntil(LineTokenizer.TokenType.COMMA,
