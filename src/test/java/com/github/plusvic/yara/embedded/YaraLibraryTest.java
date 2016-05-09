@@ -27,6 +27,5 @@ public class YaraLibraryTest {
     public void testFinalize() throws IOException {
         YaraLibrary library = new YaraLibrary();
         library.initialize();
-        library.close();
     }
 }

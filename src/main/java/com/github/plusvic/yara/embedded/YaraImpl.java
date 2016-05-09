@@ -10,9 +10,9 @@ import com.github.plusvic.yara.YaraException;
  * @apiNote There should be only one component instance per process
  */
 public class YaraImpl implements Yara {
-    private final YaraLibrary library;
+    private static final YaraLibrary library;
 
-    public YaraImpl() {
+    static {
         library = new YaraLibrary();
         library.initialize();
     }
@@ -35,8 +35,5 @@ public class YaraImpl implements Yara {
 
     @Override
     public void close() throws Exception {
-        if (library != null) {
-            library.close();
-        }
     }
 }
