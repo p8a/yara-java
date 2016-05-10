@@ -1,9 +1,13 @@
 package com.github.plusvic.yara.external;
 
-import com.github.plusvic.yara.*;
+import com.github.plusvic.yara.ErrorCode;
+import com.github.plusvic.yara.YaraException;
+import com.github.plusvic.yara.YaraScanCallback;
+import com.github.plusvic.yara.YaraScanner;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static com.github.plusvic.yara.Preconditions.checkArgument;
 
@@ -31,6 +35,11 @@ public class YaraScannerImpl implements YaraScanner {
 
     @Override
     public void scan(File file) {
+        scan(file, null);
+    }
+
+    @Override
+    public void scan(File file, Map<String, String> moduleArgs) {
         checkArgument(file != null);
 
         if (!file.exists()) {
@@ -38,10 +47,11 @@ public class YaraScannerImpl implements YaraScanner {
         }
 
         try {
-            yara.match(file.toPath(), callback);
+            yara.match(file.toPath(), moduleArgs, callback);
         } catch (Exception e) {
             throw new YaraException(e.getMessage());
         }
+
     }
 
     @Override

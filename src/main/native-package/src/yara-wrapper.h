@@ -173,6 +173,48 @@ yara_compiler_add_file(JNIEnv *env, void *compiler, const char *path, const char
     return ret;
 }
 
+/*
+ *  Module functions
+ */
+static jstring
+yara_module_name(JNIEnv *env, void *v) {
+    YR_MODULE_IMPORT *mod = (YR_MODULE_IMPORT *)v;
+
+
+    return !mod || !mod->module_name ? NULL :
+        cast_jstring(env, (char*)mod->module_name);
+}
+
+static int64_t
+yara_module_load_data(JNIEnv *env, void *pv, const char *path) {
+    YR_MAPPED_FILE   *mp  = 0;
+    YR_MODULE_IMPORT *mod = (YR_MODULE_IMPORT *)pv;
+
+    if (mod) {
+        mp = malloc(sizeof(YR_MAPPED_FILE));
+
+        if (ERROR_SUCCESS == yr_filemap_map(path, mp)) {
+            mod->module_data = mp->data;
+            mod->module_data_size = mp->size;
+        }
+        else {
+            free(mp);
+            mp = 0;
+        }
+    }
+
+    return (int64_t)mp;
+}
+
+static void
+yara_module_unload_data(JNIEnv *env, void *pv) {
+    YR_MAPPED_FILE *mp = (YR_MAPPED_FILE *)pv;
+
+    if (mp) {
+        yr_filemap_unmap(mp);
+    }
+}
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -8,7 +8,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -161,6 +163,51 @@ public class YaraScannerImplTest {
         }
 
         assertFalse(match.get());
+    }
+
+    @Test
+    public void testScanModule() throws Exception {
+        // Write test file
+        File temp = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
+        Files.write(Paths.get(temp.getAbsolutePath()), "Hello world".getBytes(), StandardOpenOption.WRITE);
+
+        Map<String, String> moduleArgs = new HashMap();
+        moduleArgs.put("pe", temp.getAbsolutePath());
+
+
+        //
+        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+
+        final AtomicBoolean match = new AtomicBoolean();
+
+        YaraScanCallback scanCallback = new YaraScanCallback() {
+            @Override
+            public void onMatch(YaraRule v) {
+
+                match.set(true);
+            }
+        };
+
+
+        // Create compiler and get scanner
+        try (YaraCompiler compiler = new YaraCompilerImpl()) {
+            compiler.setCallback(compileCallback);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
+
+            try (YaraScanner scanner = compiler.createScanner()) {
+                assertNotNull(scanner);
+
+                scanner.setCallback(scanCallback);
+                scanner.scan(temp, moduleArgs);
+            }
+        }
+
+        assertTrue(match.get());
     }
 
     private void assertMetas(Iterator<YaraMeta> metas) {

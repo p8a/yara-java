@@ -7,10 +7,7 @@ import com.github.plusvic.yara.YaraScanCallback;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,28 +49,38 @@ public class YaraExecutable {
         return this;
     }
 
-    private String[] getCommandLine(Path target) {
+    private String[] getCommandLine(Path target, Map<String, String> moduleArgs) {
         List<String> args = new ArrayList<>();
         args.add("-g");  // tags
         args.add("-m"); // meta
         args.add("-s"); // strings
 
+        // module initialization
+        if (moduleArgs != null && moduleArgs.size() > 0) {
+            moduleArgs.forEach( (k, v) -> {
+                args.add("-x");
+                args.add(String.format("%s=%s", k, v));
+            });
+        }
+
+        // rules
         for (Path path : rules) {
             args.add(path.toAbsolutePath().toString());
         }
 
+        // sample
         args.add(target.toAbsolutePath().toString());
 
         return args.toArray(new String[]{});
     }
 
-    public boolean match(Path target, YaraScanCallback callback) throws Exception {
+    public boolean match(Path target, Map<String, String> moduleArgs, YaraScanCallback callback) throws Exception {
         if (target == null || callback == null) {
             throw new IllegalArgumentException();
         }
 
         try {
-            Process process = executable.execute(getCommandLine(target));
+            Process process = executable.execute(getCommandLine(target, moduleArgs));
             process.waitFor(timeout, TimeUnit.SECONDS);
 
             try (BufferedReader pout = new BufferedReader(new InputStreamReader(process.getInputStream()));

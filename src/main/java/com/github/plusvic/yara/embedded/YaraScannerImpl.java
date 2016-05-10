@@ -5,9 +5,12 @@ import org.fusesource.hawtjni.runtime.Callback;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.github.plusvic.yara.Preconditions.checkArgument;
-import static com.github.plusvic.yara.Preconditions.checkState;
 
 /**
  * User: pba
@@ -15,28 +18,48 @@ import static com.github.plusvic.yara.Preconditions.checkState;
  * Time: 10:06 AM
  */
 public class YaraScannerImpl implements YaraScanner {
+    private static final Logger LOGGER = Logger.getLogger(YaraScannerImpl.class.getName());
+
     private static final long CALLBACK_MSG_RULE_MATCHING = 1;
+    private static final long CALLBACK_MSG_RULE_NOT_MATCHING = 2;
+    private static final long CALLBACK_MSG_SCAN_FINISHED = 3;
+    private static final long CALLBACK_MSG_IMPORT_MODULE = 4;
 
     private class NativeScanCallback {
         private final YaraLibrary library;
-        private final YaraScanCallback callback;
+        private final YaraScanCallback scanCallback;
+        private final YaraModuleCallback moduleCallback;
 
         public NativeScanCallback(YaraLibrary library, YaraScanCallback callback) {
+            this(library, callback, null);
+        }
+
+        public NativeScanCallback(YaraLibrary library, YaraScanCallback scanCallback, YaraModuleCallback moduleCallback) {
             this.library = library;
-            this.callback = callback;
+            this.scanCallback = scanCallback;
+            this.moduleCallback = moduleCallback;
         }
 
         long nativeOnScan(long type, long message, long data) {
             if (type == CALLBACK_MSG_RULE_MATCHING) {
-                YaraRuleImpl rule = new YaraRuleImpl(library, message);
-                callback.onMatch(rule);
+                if (scanCallback != null) {
+                    YaraRuleImpl rule = new YaraRuleImpl(library, message);
+                    scanCallback.onMatch(rule);
+                }
             }
+            else if (type == CALLBACK_MSG_IMPORT_MODULE) {
+                if (moduleCallback != null) {
+                    YaraModule module = new YaraModule(library, message);
+                    moduleCallback.onImport(module);
+                }
+            }
+
             return 0;
         }
     }
 
     private YaraLibrary library;
-    private Callback callback;
+    private YaraScanCallback scanCallback;
     private long peer;
     private int timeout = 60;
 
@@ -56,11 +79,6 @@ public class YaraScannerImpl implements YaraScanner {
 
     @Override
     public void close() throws IOException {
-        if (callback != null) {
-            callback.dispose();
-            callback = null;
-        }
-
         if (peer != 0) {
             library.rulesDestroy(peer);
             peer = 0;
@@ -83,13 +101,7 @@ public class YaraScannerImpl implements YaraScanner {
      */
     public void setCallback(YaraScanCallback cbk) {
         checkArgument(cbk != null);
-
-        if (callback != null) {
-            callback.dispose();
-            callback = null;
-        }
-
-        callback = new Callback(new NativeScanCallback(library, cbk), "nativeOnScan", 3);
+        this.scanCallback = cbk;
     }
 
     /**
@@ -98,11 +110,51 @@ public class YaraScannerImpl implements YaraScanner {
      * @param file
      */
     public void scan(File file) {
-        checkState(callback != null);
+        scan(file, null);
+    }
 
-        int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callback.getAddress(), 0, timeout);
-        if (!ErrorCode.isSuccess(ret)) {
-            throw new YaraException(ret);
+    /**
+     * Scan file
+     * @param file
+     * @param moduleArgs Module arguments (-x)
+     */
+    @Override
+    public void scan(File file, Map<String, String> moduleArgs) {
+        Set<YaraModule> loadedModules = new HashSet<>();
+
+        YaraModuleCallback moduleCallback = null;
+
+        if (moduleArgs != null) {
+            moduleCallback = module -> {
+                String name = module.getName();
+
+                if (moduleArgs.containsKey(name)) {
+                    if (module.loadData(moduleArgs.get(name))) {
+                        LOGGER.log(Level.FINE, MessageFormat.format("Loaded module {0} data from {1}",
+                                name, moduleArgs.get(name)));
+
+                        loadedModules.add(module);
+                    }
+                    else {
+                        LOGGER.log(Level.WARNING, MessageFormat.format("Failed to load module {0} data from {1}",
+                                name, moduleArgs.get(name)));
+                    }
+                }
+            };
+        }
+
+        Callback callback = new Callback(new NativeScanCallback(library, scanCallback, moduleCallback),
+                "nativeOnScan", 3);
+
+        try {
+            int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callback.getAddress(), 0, timeout);
+            if (!ErrorCode.isSuccess(ret)) {
+                throw new YaraException(ret);
+            }
+        }
+        finally {
+            callback.dispose();
+            loadedModules.forEach( module -> module.unloadData());
         }
     }
 }

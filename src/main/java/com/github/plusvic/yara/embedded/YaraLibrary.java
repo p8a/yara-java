@@ -236,4 +236,25 @@ public class YaraLibrary implements Closeable {
         Preconditions.checkState(library != null);
         return yara_match_value(null, pv);
     }
+
+    /*
+        Modules
+     */
+    private final native String yara_module_name(JNIEnv env, @JniArg(cast = "void*") long pv);
+    public String moduleName(long pv) {
+        Preconditions.checkState(library != null);
+        return yara_module_name(null, pv);
+    }
+
+    private final native long yara_module_load_data(JNIEnv env, @JniArg(cast = "void*") long pv, String data);
+    public long moduleLoadData(long pv, String data) {
+        Preconditions.checkState(library != null);
+        return yara_module_load_data(null, pv, data);
+    }
+
+    private final native void yara_module_unload_data(JNIEnv env, @JniArg(cast = "void*") long pv);
+    public void moduleUnloadData(long pv) {
+        Preconditions.checkState(library != null);
+        yara_module_unload_data(null, pv);
+    }
 }

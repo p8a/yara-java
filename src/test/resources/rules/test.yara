@@ -1,3 +1,5 @@
+import "pe"
+
 rule HereIsATest{
   meta:
     name = "Here is a test"

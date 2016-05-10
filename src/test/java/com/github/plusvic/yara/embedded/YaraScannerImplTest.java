@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,7 +27,8 @@ import static org.junit.Assert.*;
  */
 @NotThreadSafe
 public class YaraScannerImplTest {
-    private static final String YARA_RULE_HELLO = "rule HelloWorld : Hello World\n"+
+    private static final String YARA_RULE_HELLO = "import \"pe\"\n" +
+            "rule HelloWorld : Hello World\n"+
             "{\n"+
             "\tmeta:\n" +
             "	my_identifier_1 = \"Some string data\"\n" +
@@ -183,6 +186,49 @@ public class YaraScannerImplTest {
         }
 
         assertFalse(match.get());
+    }
+
+    @Test
+    public void testScanModule() throws Exception {
+        // Write test file
+        File temp = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
+        Files.write(Paths.get(temp.getAbsolutePath()), "Hello world".getBytes(), StandardOpenOption.WRITE);
+
+        Map<String, String> args = new HashMap();
+        args.put("pe", temp.getAbsolutePath());
+
+
+        //
+        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+
+        final AtomicBoolean match = new AtomicBoolean();
+
+        YaraScanCallback scanCallback = new YaraScanCallback() {
+            @Override
+            public void onMatch(YaraRule v) {
+                match.set(true);
+            }
+        };
+
+        // Create compiler and get scanner
+        try (YaraCompiler compiler = yara.createCompiler()) {
+            compiler.setCallback(compileCallback);
+            compiler.addRulesContent(YARA_RULE_HELLO, null);
+
+            try (YaraScanner scanner = compiler.createScanner()) {
+                assertNotNull(scanner);
+
+                scanner.setCallback(scanCallback);
+                scanner.scan(temp, args);
+            }
+        }
+
+        assertTrue(match.get());
     }
 
     private void assertMetas(Iterator<YaraMeta> metas) {
