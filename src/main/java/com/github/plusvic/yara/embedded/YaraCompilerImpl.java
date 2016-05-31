@@ -149,7 +149,7 @@ public class YaraCompilerImpl implements YaraCompiler {
                     String line;
 
                     while (null != (line = bsr.readLine())) {
-                        content.append(line);
+                        content.append(line).append("\n");
                     }
                 }
 
