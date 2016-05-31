@@ -18,7 +18,7 @@ Example (building from 3.4.0 version)
 git clone https://github.com/plusvic/yara.git<br/>
 cd yara<br/>
 git checkout tags/v3.4.0<br/>
-./bootstrap<br/>
+./bootstrap.sh<br/>
 ./configure<br/>
 make<br/>
 
