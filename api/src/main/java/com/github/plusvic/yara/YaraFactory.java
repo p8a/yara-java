@@ -14,7 +14,7 @@ public class YaraFactory {
     public static Yara create(Mode mode) {
         switch (mode) {
             case EMBEDDED:
-                return new YaraImpl();
+                return YaraImpl.instance();
             case EXTERNAL:
                 return new com.github.plusvic.yara.external.YaraImpl();
             default:
