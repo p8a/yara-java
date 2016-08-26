@@ -1,6 +1,7 @@
 package com.github.plusvic.yara.external;
 
 import com.github.plusvic.yara.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -49,6 +50,7 @@ public class YaraCompilerTest {
             "\tcondition:\n"+
             "\t\t$a or $b\n"+
             "}";
+    public static final String RULES_DIR = "./rules";
 
     @Test
     public void testCreate() {
@@ -217,6 +219,34 @@ public class YaraCompilerTest {
             }
 
             assertFalse(called.get());
+        }
+    }
+
+    @Test
+    public void testAddRulesDirSucceeds() throws Exception {
+        YaraCompilationCallback callback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+        try (YaraCompiler compiler = new YaraCompilerImpl()) {
+            compiler.setCallback(callback);
+            Assert.assertEquals(3, compiler.addRulesDirectory(Thread.currentThread().getContextClassLoader().getResource(RULES_DIR).getPath(), null, false));
+        }
+    }
+
+    @Test
+    public void testAddRulesDirRecursiveSucceeds() throws Exception {
+        YaraCompilationCallback callback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+        try (YaraCompiler compiler = new YaraCompilerImpl()) {
+            compiler.setCallback(callback);
+            Assert.assertEquals(5, compiler.addRulesDirectory(Thread.currentThread().getContextClassLoader().getResource(RULES_DIR).getPath(), null, true));
         }
     }
 

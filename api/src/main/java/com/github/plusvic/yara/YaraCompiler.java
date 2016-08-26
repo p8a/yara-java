@@ -1,5 +1,6 @@
 package com.github.plusvic.yara;
 
+
 import java.io.IOException;
 
 /**
@@ -21,6 +22,15 @@ public interface YaraCompiler extends AutoCloseable {
      * @return
      */
     void addRulesContent(String content, String namespace);
+
+    /**
+     * Add rules file
+     *
+     * @param dirPath
+     * @param recursive
+     * @return
+     */
+    int addRulesDirectory(String dirPath, String namespace, boolean recursive);
 
     /**
      * Add rules file

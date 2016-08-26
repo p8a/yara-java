@@ -3,13 +3,8 @@ package com.github.plusvic.yara.embedded;
 import com.github.plusvic.yara.*;
 import org.fusesource.hawtjni.runtime.Callback;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -21,7 +16,7 @@ import static com.github.plusvic.yara.Preconditions.checkState;
 /**
  * Yara compiler
  */
-public class YaraCompilerImpl implements YaraCompiler {
+public class YaraCompilerImpl extends YaraCompilerAbstract {
     private static final Logger LOGGER = Logger.getLogger(YaraCompilerImpl.class.getName());
 
     /**
@@ -101,7 +96,7 @@ public class YaraCompilerImpl implements YaraCompiler {
      */
     public void addRulesContent(String content, String namespace) {
         int ret  = library.compilerAddString(peer, content, namespace);
-        if (ret != ErrorCode.SUCCESS.getValue()) {
+        if (callback == null && ret != ErrorCode.SUCCESS.getValue()) {
             throw new YaraException(ret);
         }
     }
@@ -113,7 +108,7 @@ public class YaraCompilerImpl implements YaraCompiler {
      */
     public void addRulesFile(String filePath, String fileName, String namespace) {
         int ret  = library.compilerAddFile(peer, filePath, namespace, fileName);
-        if (ret != ErrorCode.SUCCESS.getValue()) {
+        if (callback == null && ret != ErrorCode.SUCCESS.getValue()) {
             throw new YaraException(ret);
         }
     }

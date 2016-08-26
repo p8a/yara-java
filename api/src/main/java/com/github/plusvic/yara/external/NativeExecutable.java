@@ -3,6 +3,7 @@ package com.github.plusvic.yara.external;
 import org.fusesource.hawtjni.runtime.Library;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -76,10 +77,10 @@ public class NativeExecutable {
         String platform = Library.getOperatingSystem();
 
         if ("osx".equals(platform)) {
-            return String.format("META-INF/native/%s/%s", platform, name);
+            return String.format("%s/%s", System.getProperty("yara.home"), name);
         }
 
-        return String.format("META-INF/native/%s/%s", Library.getPlatform(), name);
+        return String.format("%s/%s", System.getProperty("yara.home"), name);
     }
 
     private Path doLoad() {
@@ -88,15 +89,12 @@ public class NativeExecutable {
         try {
             Path tempPath = File.createTempFile(name, Integer.toString(UUID.randomUUID().hashCode())).toPath();
 
-            URL resource = this.classLoader.getResource(resourcePath);
-            if (resource != null) {
-                try (InputStream is = resource.openStream()) {
-                    Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
-                }
-                Files.setPosixFilePermissions(tempPath, EXECUTABLE_PERMISSIONS);
-
-                return tempPath;
+            try (InputStream is = new FileInputStream(new File(resourcePath))) {
+                Files.copy(is, tempPath, StandardCopyOption.REPLACE_EXISTING);
             }
+            Files.setPosixFilePermissions(tempPath, EXECUTABLE_PERMISSIONS);
+
+            return tempPath;
         } catch (IOException ioe) {
             LOGGER.log(Level.WARNING, MessageFormat.format("Failed to write executable to {0}: {1}",
                     localPath, ioe.toString()));

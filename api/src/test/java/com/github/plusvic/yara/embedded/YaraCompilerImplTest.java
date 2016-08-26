@@ -1,6 +1,7 @@
 package com.github.plusvic.yara.embedded;
 
 import com.github.plusvic.yara.*;
+import com.github.plusvic.yara.external.YaraCompilerTest;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.*;
 
@@ -117,10 +118,9 @@ public class YaraCompilerImplTest {
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(callback);
             compiler.addRulesContent(YARA_RULE_FAIL, null);
-
-            fail();
         }
         catch (YaraException e) {
+            fail();
         }
 
         assertTrue(called.get());
@@ -175,9 +175,9 @@ public class YaraCompilerImplTest {
             compiler.addRulesPackage(TestUtils.getResource("rules/one-level.zip").toString(), null);
             compiler.addRulesPackage(TestUtils.getResource("rules/two-levels.zip").toString(), null);
 
-            fail();
         }
         catch(YaraException e) {
+            fail();
         }
 
         assertTrue(called.get());
@@ -226,12 +226,40 @@ public class YaraCompilerImplTest {
             compiler.setCallback(callback);
             compiler.addRulesFile(rule.toString(), rule.toString(), null);
 
-            fail();
         }
         catch(YaraException e) {
+            fail();
         }
 
         assertTrue(called.get());
+    }
+
+    @Test
+    public void testAddRulesDirSucceeds() throws Exception {
+        YaraCompilationCallback callback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                System.out.println("Failed compilation of rule: " + fileName);
+            }
+        };
+        try (YaraCompiler compiler = yara.createCompiler()) {
+            compiler.setCallback(callback);
+            Assert.assertEquals(3, compiler.addRulesDirectory(Thread.currentThread().getContextClassLoader().getResource(YaraCompilerTest.RULES_DIR).getPath(), null, false));
+        }
+    }
+
+    @Test
+    public void testAddRulesDirRecursiveSucceeds() throws Exception {
+        YaraCompilationCallback callback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                System.out.println("Failed compilation of rule: " + fileName);
+            }
+        };
+        try (YaraCompiler compiler = yara.createCompiler()) {
+            compiler.setCallback(callback);
+            Assert.assertEquals(5, compiler.addRulesDirectory(Thread.currentThread().getContextClassLoader().getResource(YaraCompilerTest.RULES_DIR).getPath(), null, true));
+        }
     }
 
 

@@ -18,7 +18,7 @@ import java.util.zip.ZipInputStream;
 
 import static com.github.plusvic.yara.Preconditions.checkArgument;
 
-public class YaraCompilerImpl implements YaraCompiler {
+public class YaraCompilerImpl extends YaraCompilerAbstract {
     private static final Logger LOGGER = Logger.getLogger(YaraCompilerImpl.class.getName());
 
     private YaraCompilationCallback callback;

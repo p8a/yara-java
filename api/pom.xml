@@ -56,28 +56,13 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>test-native</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <dirset dir="${project.build.directory}/generated-sources/hawtjni/lib/META-INF/native/" id="platform">
-                                    <include name="*" />
-                                </dirset>
-                                <copy file="${yara.home}/yara"
-                                      tofile="${project.build.directory}/test-classes/META-INF/native/${toString:platform}/yara"/>
-                                <copy file="${yara.home}/yarac"
-                                      tofile="${project.build.directory}/test-classes/META-INF/native/${toString:platform}/yarac"/>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <yara.home>${yara.home}</yara.home>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>
