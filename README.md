@@ -26,7 +26,56 @@ mvn clean install
 Usage and examples
 ------------------
 
-See the unit tests
+~~~~
+        // Initialise library
+        YaraImpl.initialiseApp();
+
+        //  create compiler instance
+        YaraCompiler compiler = YaraImpl.newCompiler();
+        try {
+            // set compiler callback for exception during compilation of rules 
+            compiler.setCallback((lvl, s, l, msg) -> {
+                System.err.println(String.format("Failed compilation: %s, %s, %s", String.valueOf(lvl), s, msg));
+            });
+            
+            // compile all rules from a directory recursively
+            compiler.addRulesDirectory("/path/to/rules/directory", null, true);
+            
+            //  get instance to rules for scanning
+            YaraScanner sc = compiler.createScanner();
+            try {
+                File subject = new File(Thread.currentThread().getContextClassLoader().getResource("libyara/NuixIntegrationTest.class").getFile());
+                
+                //  set call back for rule match found
+                sc.setCallback((rule, ref) -> {
+                    System.out.println(ref.getReference());
+                });
+                // scan
+                sc.scan(subject);
+            } finally {
+                if (sc != null) {
+                    try {
+                        sc.close();
+                    } catch (Exception e) {
+                        Assert.fail(e.getMessage());
+                    }
+                }
+            }
+        } finally {
+            if (compiler != null) {
+                try {
+                    compiler.close();
+                } catch (Exception e) {
+                    Assert.fail(e.getMessage());
+                }
+            }
+        }
+        
+        // finalise native library
+        YaraImpl.finaliseApp();
+~~~~
+
+For details, refer to unit tests
 
 
 Troubleshooting
