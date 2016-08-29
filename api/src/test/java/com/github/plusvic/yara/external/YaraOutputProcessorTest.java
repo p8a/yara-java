@@ -31,7 +31,7 @@ public class YaraOutputProcessorTest {
     public void testStartComplete() {
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 fail();
             }
         };
@@ -47,7 +47,7 @@ public class YaraOutputProcessorTest {
 
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 captureRule.set(rule);
             }
         };
@@ -71,7 +71,7 @@ public class YaraOutputProcessorTest {
 
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 captureRule.set(rule);
             }
         };
@@ -105,7 +105,7 @@ public class YaraOutputProcessorTest {
 
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 captureRule.set(rule);
             }
         };
@@ -142,7 +142,7 @@ public class YaraOutputProcessorTest {
 
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 captureRule.set(rule);
             }
         };
@@ -183,7 +183,7 @@ public class YaraOutputProcessorTest {
 
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 captureRule.set(rule);
             }
         };
@@ -250,7 +250,7 @@ public class YaraOutputProcessorTest {
 
         YaraScanCallback callback = new YaraScanCallback() {
             @Override
-            public void onMatch(YaraRule rule) {
+            public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                 rules.add(rule);
             }
         };

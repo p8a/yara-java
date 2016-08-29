@@ -15,7 +15,7 @@ public abstract class YaraCompilerAbstract implements YaraCompiler {
         int count = 0;
         for (File f : d.listFiles()) {
             if (f.isFile() && isValidRule(f)) {
-                addRulesFile(f.getParent(), f.getName(), namespace);
+                addRulesFile(f.getAbsolutePath(), f.getName(), namespace);
                 count++;
             } else if (recursive && f.isDirectory()) {
                 count += addRulesDirectory(f.getAbsolutePath(), namespace, recursive);

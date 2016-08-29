@@ -29,22 +29,24 @@ public class YaraScannerImpl implements YaraScanner {
         private final YaraLibrary library;
         private final YaraScanCallback scanCallback;
         private final YaraModuleCallback moduleCallback;
+        private final DataRef<Object> dataRef;
 
-        public NativeScanCallback(YaraLibrary library, YaraScanCallback callback) {
-            this(library, callback, null);
+        public NativeScanCallback(YaraLibrary library, YaraScanCallback callback, DataRef<Object> dataRef) {
+            this(library, callback, null, dataRef);
         }
 
-        public NativeScanCallback(YaraLibrary library, YaraScanCallback scanCallback, YaraModuleCallback moduleCallback) {
+        public NativeScanCallback(YaraLibrary library, YaraScanCallback scanCallback, YaraModuleCallback moduleCallback, DataRef<Object> dataRef) {
             this.library = library;
             this.scanCallback = scanCallback;
             this.moduleCallback = moduleCallback;
+            this.dataRef = dataRef;
         }
 
         long nativeOnScan(long type, long message, long data) {
             if (type == CALLBACK_MSG_RULE_MATCHING) {
                 if (scanCallback != null) {
                     YaraRuleImpl rule = new YaraRuleImpl(library, message);
-                    scanCallback.onMatch(rule);
+                    scanCallback.onMatch(rule, dataRef);
                 }
             }
             else if (type == CALLBACK_MSG_IMPORT_MODULE) {
@@ -143,12 +145,12 @@ public class YaraScannerImpl implements YaraScanner {
             };
         }
 
-        Callback callback = new Callback(new NativeScanCallback(library, scanCallback, moduleCallback),
+        Callback callback = new Callback(new NativeScanCallback(library, scanCallback, moduleCallback, new DataRef<>(file)),
                 "nativeOnScan", 3);
 
         try {
             int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callback.getAddress(), 0, timeout);
-            if (!ErrorCode.isSuccess(ret)) {
+            if (scanCallback == null && !ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }
         }

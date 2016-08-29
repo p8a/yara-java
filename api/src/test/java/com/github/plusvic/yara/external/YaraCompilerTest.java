@@ -179,7 +179,7 @@ public class YaraCompilerTest {
             try (YaraScanner scanner = compiler.createScanner()) {
                 scanner.setCallback(new YaraScanCallback() {
                     @Override
-                    public void onMatch(YaraRule rule) {
+                    public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                     }
                 });
                 scanner.scan(temp);
@@ -212,7 +212,7 @@ public class YaraCompilerTest {
             try (YaraScanner scanner = compiler.createScanner()) {
                 scanner.setCallback(new YaraScanCallback() {
                     @Override
-                    public void onMatch(YaraRule rule) {
+                    public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                     }
                 });
                 scanner.scan(temp);
@@ -274,7 +274,7 @@ public class YaraCompilerTest {
             try (YaraScanner scanner = compiler.createScanner()) {
                 scanner.setCallback(new YaraScanCallback() {
                     @Override
-                    public void onMatch(YaraRule rule) {
+                    public void onMatch(YaraRule rule, DataRef<Object> dataRef) {
                     }
                 });
                 scanner.scan(temp);

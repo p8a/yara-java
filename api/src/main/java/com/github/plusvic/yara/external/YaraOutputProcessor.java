@@ -147,7 +147,7 @@ class YaraOutputProcessor {
      * Rule match completed
      */
     private void onRuleComplete() {
-        callback.onMatch(rule);
+        callback.onMatch(rule, null);
         rule = null;
         string = null;
     }
