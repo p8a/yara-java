@@ -167,10 +167,12 @@
     </build>
 
     <profiles>
-    <profile>
+        <profile>
             <id>mac</id>
             <activation>
-                <os><family>mac</family></os>
+                <os>
+                    <family>mac</family>
+                </os>
             </activation>
             <build>
                 <plugins>
@@ -187,6 +189,35 @@
                                 <arg>--with-universal=x86_64</arg>
                             </configureArgs>
                             <platform>osx</platform>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>linux64</id>
+            <activation>
+                <os>
+                    <family>Linux</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.fusesource.hawtjni</groupId>
+                        <artifactId>maven-hawtjni-plugin</artifactId>
+                        <configuration>
+                            <osgiPlatforms>
+                                <osgiPlatform>osname=Linux;processor=x86-64</osgiPlatform>
+                                <osgiPlatform>osname=Linux;processor=x86</osgiPlatform>
+                                <osgiPlatform>*</osgiPlatform>
+                            </osgiPlatforms>
+                            <configureArgs>
+                                <arg>--with-universal=x86_64</arg>
+                                <arg>--libdir=${project.build.directory}/native-build/target/lib</arg>
+                            </configureArgs>
+                            <platform>linux64</platform>
                         </configuration>
                     </plugin>
                 </plugins>
