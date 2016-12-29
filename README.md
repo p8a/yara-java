@@ -12,25 +12,26 @@ How to build
 ------------
 
 ### Get and build yara source code
+> Use 3.4.0
 
-Example (building from 3.4.0 version)
-
-git clone https://github.com/plusvic/yara.git<br/>
-cd yara<br/>
-git checkout tags/v3.4.0<br/>
-./bootstrap.sh<br/>
-./configure<br/>
-make<br/>
+Follow directions from http://yara.readthedocs.io/
 
 ### Get and build yara-java
-
-Example (in "yara" folder):
-
-git clone https://github.com/papostolescu/yara-java.git<br/>
-cd yara-java<br/>
-mvn clean install<br/>
-
+~~~~
+git clone https://github.com/siddharthTyagi/yara-java.git
+cd yara-java
+export YARA_HOME=/path/to/compiled/yara
+mvn clean install
+~~~~
 Usage and examples
 ------------------
 
 See the unit tests
+
+
+Troubleshooting
+---------------
+If you run into build issues with static object cannot be linked with shared (use -fPIC)
+>specify --enable-shared  with configure to avoid fPIC exception on building yara-java
+>Example: ``./configure --enable-shared``
+For me, I had to modify Makefile for both yara and libyara and add CFLAG -fPIC, to respect the same
