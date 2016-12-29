@@ -2,9 +2,7 @@ package com.github.plusvic.yara.embedded;
 
 import com.github.plusvic.yara.*;
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,16 +39,21 @@ public class YaraScannerImplTest {
             "\t\t$a\n"+
             "}";
 
-    private YaraImpl yara;
+    private Yara yara;
+
+    @BeforeClass
+    public static void initApp() {
+        YaraImpl.initialiseApp();
+    }
 
     @Before
     public void setup() {
-        this.yara = new YaraImpl();
+        this.yara = YaraImpl.instance();
     }
 
-    @After
-    public void teardown() throws Exception {
-        yara.close();
+    @AfterClass
+    public static void teardown() throws Exception {
+        YaraImpl.finaliseApp();
     }
 
 

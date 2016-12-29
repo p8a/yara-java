@@ -1,5 +1,7 @@
 package com.github.plusvic.yara.embedded;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.plusvic.yara.YaraCompiler;
 
@@ -11,18 +13,21 @@ import static org.junit.Assert.assertNotNull;
  * Time: 6:51 PM
  */
 public class YaraImplTest {
-    @Test
-    public void testCreateClose() throws Exception {
-        try (YaraImpl yara = new YaraImpl()) {
-        }
+
+    @BeforeClass
+    public static void testInitialise() throws Exception {
+        YaraImpl.initialiseApp();
     }
 
     @Test
     public void testCreateCompiler() throws Exception {
-        try (YaraImpl yara = new YaraImpl()) {
-            try (YaraCompiler compiler = yara.createCompiler())  {
-                assertNotNull(compiler);
-            }
+        try (YaraCompiler compiler = YaraImpl.newCompiler()) {
+            assertNotNull(compiler);
         }
+    }
+
+    @AfterClass
+    public static void testFinalise() throws Exception {
+        YaraImpl.finaliseApp();
     }
 }
