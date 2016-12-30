@@ -16,21 +16,25 @@ How to build
 
 Example (building from 3.5.0 version)
 
-git clone https://github.com/virustotal/yara.git<br/>
-cd yara<br/>
-git checkout tags/v3.5.0<br/>
-./bootstrap.sh<br/>
-./configure<br/>
-make<br/>
+```
+git clone https://github.com/virustotal/yara.git
+cd yara
+git checkout tags/v3.5.0
+./bootstrap.sh
+./configure
+make
+```
 
 ### Get and build yara-java
 
 Example (in "yara" folder):
 
-git clone https://github.com/p8a/yara-java.git<br/>
-cd yara-java<br/>
+```
+git clone https://github.com/p8a/yara-java.git
+cd yara-java
 git checkout tags/v3.5.0
-mvn clean install<br/>
+mvn clean install
+```
 
 Usage and examples
 ------------------
