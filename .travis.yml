@@ -1,15 +1,23 @@
 language: java
+
 jdk:
   - oraclejdk8
+
+os:
+  - linux
+  - osx
+
 before_install:
   - git clone https://github.com/virustotal/yara.git
   - cd yara
   - git checkout tags/v3.5.0
   - ./bootstrap.sh
-  - ./configure
+  - ./configure CFLAGS=-fPIC
   - make
+
 install:
   - git clone https://github.com/$TRAVIS_REPO_SLUG.git yara-java
   - cd yara-java
+
 script:
   - mvn package
