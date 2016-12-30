@@ -20,12 +20,19 @@ import static com.github.plusvic.yara.Preconditions.checkArgument;
 public class YaraScannerImpl implements YaraScanner {
     private static final Logger LOGGER = Logger.getLogger(YaraScannerImpl.class.getName());
 
+    private static final long CALLBACK_CONTINUE = 0;
+    private static final long CALLBACK_ABORT = 1;
+
+
     private static final long CALLBACK_MSG_RULE_MATCHING = 1;
     private static final long CALLBACK_MSG_RULE_NOT_MATCHING = 2;
     private static final long CALLBACK_MSG_SCAN_FINISHED = 3;
     private static final long CALLBACK_MSG_IMPORT_MODULE = 4;
 
     private class NativeScanCallback {
+        private boolean negate = false;
+        private int maxRules = 0;
+        private int count = 0;
         private final YaraLibrary library;
         private final YaraScanCallback scanCallback;
         private final YaraModuleCallback moduleCallback;
@@ -40,8 +47,28 @@ public class YaraScannerImpl implements YaraScanner {
             this.moduleCallback = moduleCallback;
         }
 
+        public void setNegate(boolean negate) {
+            this.negate = negate;
+            return;
+        }
+
+        public void setMaxRules(int count) {
+            checkArgument(count >= 0);
+            this.maxRules = count;
+        }
+
         long nativeOnScan(long type, long message, long data) {
-            if (type == CALLBACK_MSG_RULE_MATCHING) {
+            if (!negate && type == CALLBACK_MSG_RULE_MATCHING) {
+                ++count;
+
+                if (scanCallback != null) {
+                    YaraRuleImpl rule = new YaraRuleImpl(library, message);
+                    scanCallback.onMatch(rule);
+                }
+            }
+            else if(negate && type == CALLBACK_MSG_RULE_NOT_MATCHING) {
+                ++count;
+
                 if (scanCallback != null) {
                     YaraRuleImpl rule = new YaraRuleImpl(library, message);
                     scanCallback.onMatch(rule);
@@ -54,7 +81,11 @@ public class YaraScannerImpl implements YaraScanner {
                 }
             }
 
-            return 0;
+            if (maxRules > 0 && count >= maxRules) {
+                return CALLBACK_ABORT;
+            }
+
+            return CALLBACK_CONTINUE;
         }
     }
 
@@ -62,6 +93,8 @@ public class YaraScannerImpl implements YaraScanner {
     private YaraScanCallback scanCallback;
     private long peer;
     private int timeout = 60;
+    private int maxRules = 0;
+    private boolean notSatisfiedOnly = false;
 
     YaraScannerImpl(YaraLibrary library, long rules) {
         checkArgument(library != null);
@@ -92,6 +125,21 @@ public class YaraScannerImpl implements YaraScanner {
     public void setTimeout(int timeout) {
         checkArgument(timeout >= 0);
         this.timeout = timeout;
+    }
+
+    /**
+     * Set maximum rules
+     * @param count
+     */
+    @Override
+    public void setMaxRules(int count) {
+        checkArgument(count > 0);
+        this.maxRules = count;
+    }
+
+    @Override
+    public void setNotSatisfiedOnly(boolean value) {
+        this.notSatisfiedOnly = value;
     }
 
     /**
@@ -143,8 +191,11 @@ public class YaraScannerImpl implements YaraScanner {
             };
         }
 
-        Callback callback = new Callback(new NativeScanCallback(library, scanCallback, moduleCallback),
-                "nativeOnScan", 3);
+        NativeScanCallback nativeCallback = new NativeScanCallback(library, scanCallback, moduleCallback);
+        nativeCallback.setMaxRules(maxRules);
+        nativeCallback.setNegate(notSatisfiedOnly);
+
+        Callback callback = new Callback(nativeCallback, "nativeOnScan", 3);
 
         try {
             int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callback.getAddress(), 0, timeout);

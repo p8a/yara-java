@@ -13,6 +13,18 @@ public interface YaraScanner extends AutoCloseable {
     void setTimeout(int timeout);
 
     /**
+     * Set maximum rules to match
+     * @param count
+     */
+    void setMaxRules(int count);
+
+    /**
+     * Return only rules that do not match (negate)
+     * @param value
+     */
+    void setNotSatisfiedOnly(boolean value);
+
+    /**
      * Set scan callback
      *
      * @param cbk

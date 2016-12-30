@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.easymock.EasyMock.createNiceMock;
 import static org.junit.Assert.*;
@@ -27,7 +28,7 @@ import static org.junit.Assert.*;
  */
 @NotThreadSafe
 public class YaraScannerImplTest {
-    private static final String YARA_RULE_HELLO = "import \"pe\"\n" +
+    private static final String YARA_RULES = "import \"pe\"\n" +
             "rule HelloWorld : Hello World\n"+
             "{\n"+
             "\tmeta:\n" +
@@ -36,6 +37,18 @@ public class YaraScannerImplTest {
             "	my_identifier_3 = true\n" +
             "\tstrings:\n"+
             "\t\t$a = \"Hello world\"\n"+
+            "\n"+
+            "\tcondition:\n"+
+            "\t\t$a\n"+
+            "}" +
+            "rule NoMatch \n"+
+            "{\n"+
+            "\tmeta:\n" +
+            "	my_identifier_1 = \"Some string data\"\n" +
+            "	my_identifier_2 = 24\n" +
+            "	my_identifier_3 = true\n" +
+            "\tstrings:\n"+
+            "\t\t$a = \"nomatch\"\n"+
             "\n"+
             "\tcondition:\n"+
             "\t\t$a\n"+
@@ -93,7 +106,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRulesContent(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULES, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -135,7 +148,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRulesContent(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULES, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -149,10 +162,109 @@ public class YaraScannerImplTest {
     }
 
     @Test
+    public void testScanNegateMatch() throws Exception {
+        /*
+            Negate and try matching on an UUID, we should have two matches
+         */
+        // Write test file
+        File temp = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
+        Files.write(Paths.get(temp.getAbsolutePath()), UUID.randomUUID().toString().getBytes(),
+                StandardOpenOption.WRITE);
+
+
+        //
+        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+
+        final AtomicInteger match = new AtomicInteger();
+
+        YaraScanCallback scanCallback = new YaraScanCallback() {
+            @Override
+            public void onMatch(YaraRule v) {
+                assertMetas(v.getMetadata());
+                assertFalse(v.getStrings().next().getMatches().hasNext());
+
+                match.incrementAndGet();
+            }
+        };
+
+        // Create compiler and get scanner
+        try (YaraCompiler compiler = yara.createCompiler()) {
+            compiler.setCallback(compileCallback);
+            compiler.addRulesContent(YARA_RULES, null);
+
+            try (YaraScanner scanner = compiler.createScanner()) {
+                scanner.setNotSatisfiedOnly(true);
+                assertNotNull(scanner);
+
+                scanner.setCallback(scanCallback);
+                scanner.scan(temp);
+            }
+        }
+
+        assertEquals(2, match.get());
+    }
+
+    @Test
+    public void testScanNegateLimitMatch() throws Exception {
+         /*
+            Negate and try matching on an UUID with limit one,
+            we should have a single match
+         */
+        // Write test file
+        File temp = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
+        Files.write(Paths.get(temp.getAbsolutePath()), UUID.randomUUID().toString().getBytes(),
+                StandardOpenOption.WRITE);
+
+
+        //
+        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+
+        final AtomicInteger match = new AtomicInteger();
+
+        YaraScanCallback scanCallback = new YaraScanCallback() {
+            @Override
+            public void onMatch(YaraRule v) {
+                assertMetas(v.getMetadata());
+                assertFalse(v.getStrings().next().getMatches().hasNext());
+
+                match.incrementAndGet();
+            }
+        };
+
+        // Create compiler and get scanner
+        try (YaraCompiler compiler = yara.createCompiler()) {
+            compiler.setCallback(compileCallback);
+            compiler.addRulesContent(YARA_RULES, null);
+
+            try (YaraScanner scanner = compiler.createScanner()) {
+                scanner.setNotSatisfiedOnly(true);
+                scanner.setMaxRules(1);
+                assertNotNull(scanner);
+
+                scanner.setCallback(scanCallback);
+                scanner.scan(temp);
+            }
+        }
+
+        assertEquals(1, match.get());
+    }
+
+    @Test
     public void testScanNoMatch() throws Exception {
         // Write test file
         File temp = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
-        Files.write(Paths.get(temp.getAbsolutePath()), "Hello 1231231world".getBytes(), StandardOpenOption.WRITE);
+        Files.write(Paths.get(temp.getAbsolutePath()), UUID.randomUUID().toString().getBytes(),
+                StandardOpenOption.WRITE);
 
 
         //
@@ -175,7 +287,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRulesContent(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULES, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);
@@ -218,7 +330,7 @@ public class YaraScannerImplTest {
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(compileCallback);
-            compiler.addRulesContent(YARA_RULE_HELLO, null);
+            compiler.addRulesContent(YARA_RULES, null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
                 assertNotNull(scanner);

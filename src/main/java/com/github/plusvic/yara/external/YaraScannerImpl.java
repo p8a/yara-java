@@ -28,6 +28,16 @@ public class YaraScannerImpl implements YaraScanner {
     }
 
     @Override
+    public void setMaxRules(int count) {
+        yara.setMaxRules(count);
+    }
+
+    @Override
+    public void setNotSatisfiedOnly(boolean value) {
+        yara.setNegate(value);
+    }
+
+    @Override
     public void setCallback(YaraScanCallback cbk) {
         checkArgument(cbk != null);
         this.callback = cbk;
