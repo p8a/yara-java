@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/p8a/yara-java.svg?branch=travis)](https://travis-ci.org/p8a/yara-java)
+
 Highlights
 ------------
 - Does not require yara to be deployed (embeds all needed native dependencies)
@@ -9,8 +11,8 @@ Highlights
 - Negate, timeout and limit supported
 
 
-How to build
-------------
+How to build 
+------------  
 
 ### Get and build yara source code
 
