@@ -1,0 +1,15 @@
+language: java
+jdk:
+  - oraclejdk8
+before_install:
+  - git clone https://github.com/virustotal/yara.git
+  - cd yara
+  - git checkout tags/v3.5.0
+  - ./bootstrap
+  - ./configure
+  - make
+install:
+  - git clone https://github.com/$TRAVIS_REPO_SLUG.git $TRAVIS_REPO_SLUG
+  - cd $TRAVIS_REPO_SLUG
+script:
+  - mvn package
