@@ -6,6 +6,7 @@ Highlights
   - Embedded: yara jnilib runs embedded in the java process
 - Rules can be loaded as strings, files or archives; for archives will recursively look for and load all yara rule files
 - Matches are returned with identifier, metadata and tags
+- Negate, timeout and limit supported
 
 
 How to build
@@ -13,11 +14,11 @@ How to build
 
 ### Get and build yara source code
 
-Example (building from 3.4.0 version)
+Example (building from 3.5.0 version)
 
-git clone https://github.com/plusvic/yara.git<br/>
+git clone https://github.com/virustotal/yara.git<br/>
 cd yara<br/>
-git checkout tags/v3.4.0<br/>
+git checkout tags/v3.5.0<br/>
 ./bootstrap.sh<br/>
 ./configure<br/>
 make<br/>
@@ -26,8 +27,9 @@ make<br/>
 
 Example (in "yara" folder):
 
-git clone https://github.com/papostolescu/yara-java.git<br/>
+git clone https://github.com/p8a/yara-java.git<br/>
 cd yara-java<br/>
+git checkout tags/v3.5.0
 mvn clean install<br/>
 
 Usage and examples
