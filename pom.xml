@@ -20,6 +20,7 @@
         <hawtjni-version>1.11</hawtjni-version>
         <hawtjni-verbose>true</hawtjni-verbose>
         <easymock-version>3.2</easymock-version>
+        <jni-with-crypto>-lcrypto</jni-with-crypto>
     </properties>
 
     <dependencies>
@@ -90,6 +91,9 @@
                         </goals>
                         <configuration>
                             <name>yara-wrapper</name>
+                            <configureArgs>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
+                            </configureArgs>
                         </configuration>
                     </execution>
                 </executions>
@@ -187,6 +191,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--with-universal=x86_64</arg>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>osx</platform>
                         </configuration>
@@ -195,7 +200,7 @@
             </build>
         </profile>
         <profile>
-            <id>linux64</id>
+            <id>linux-amd64</id>
             <activation>
                 <os>
                     <family>Linux</family>
@@ -214,8 +219,8 @@
                                 <osgiPlatform>*</osgiPlatform>
                             </osgiPlatforms>
                             <configureArgs>
-                                <arg>--with-universal=x86_64</arg>
                                 <arg>--libdir=${project.build.directory}/native-build/target/lib</arg>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>linux64</platform>
                         </configuration>
