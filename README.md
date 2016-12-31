@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/p8a/yara-java.svg?branch=travis)](https://travis-ci.org/p8a/yara-java)
+[![Build Status](https://travis-ci.org/p8a/yara-java.svg)](https://travis-ci.org/p8a/yara-java)
 
 Highlights
 ------------
