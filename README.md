@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/p8a/yara-java.svg?branch=travis)](https://travis-ci.org/p8a/yara-java)
+
 Highlights
 ------------
 - Does not require yara to be deployed (embeds all needed native dependencies)
@@ -9,28 +11,32 @@ Highlights
 - Negate, timeout and limit supported
 
 
-How to build
-------------
+How to build 
+------------  
 
 ### Get and build yara source code
 
 Example (building from 3.5.0 version)
 
-git clone https://github.com/virustotal/yara.git<br/>
-cd yara<br/>
-git checkout tags/v3.5.0<br/>
-./bootstrap.sh<br/>
-./configure<br/>
-make<br/>
+```
+git clone https://github.com/virustotal/yara.git
+cd yara
+git checkout tags/v3.5.0
+./bootstrap.sh
+./configure
+make
+```
 
 ### Get and build yara-java
 
 Example (in "yara" folder):
 
-git clone https://github.com/p8a/yara-java.git<br/>
-cd yara-java<br/>
+```
+git clone https://github.com/p8a/yara-java.git
+cd yara-java
 git checkout tags/v3.5.0
-mvn clean install<br/>
+mvn clean install
+```
 
 Usage and examples
 ------------------
