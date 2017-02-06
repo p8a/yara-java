@@ -72,7 +72,11 @@ public class YaraCompilerImpl implements YaraCompiler {
         checkState(callback == null);
 
         callback = new Callback(new NativeCompilationCallback(library, cbk), "nativeOnError", 5);
-        library.compilerSetCallback(peer, callback.getAddress(), 0);
+        final long callBackAddress = callback.getAddress();
+        if(callBackAddress == 0) {
+          throw new IllegalStateException("Too many concurent callbacks, unable to create.");
+        }
+        library.compilerSetCallback(peer, callBackAddress, 0);
     }
 
     /**

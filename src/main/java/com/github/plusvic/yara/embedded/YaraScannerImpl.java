@@ -118,6 +118,12 @@ public class YaraScannerImpl implements YaraScanner {
         }
         library = null;
     }
+    @Override
+    public void finalizeThread() {
+         if (library != null) {
+            library.finalizeThread();
+        }   
+    }
 
     /**
      * Set scan timeout
@@ -160,7 +166,7 @@ public class YaraScannerImpl implements YaraScanner {
     public void scan(File file) {
         scan(file, null);
     }
-
+  
     /**
      * Scan file
      * @param file
@@ -168,6 +174,18 @@ public class YaraScannerImpl implements YaraScanner {
      */
     @Override
     public void scan(File file, Map<String, String> moduleArgs) {
+        scan(file, moduleArgs, this.scanCallback);
+    }
+
+    /**
+     * Scan file
+     * <br>Use this method for multithreaded operation. When calling this
+     * method it is not necessary to set any parameters on the YaraScanner object
+     * @param file
+     * @param moduleArgs Module arguments (-x)
+     */
+    @Override
+    public void scan(File file, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
         Set<YaraModule> loadedModules = new HashSet<>();
 
         YaraModuleCallback moduleCallback = null;
@@ -191,14 +209,18 @@ public class YaraScannerImpl implements YaraScanner {
             };
         }
 
-        NativeScanCallback nativeCallback = new NativeScanCallback(library, scanCallback, moduleCallback);
+        NativeScanCallback nativeCallback = new NativeScanCallback(library, yaraScanCallback, moduleCallback);
         nativeCallback.setMaxRules(maxRules);
         nativeCallback.setNegate(notSatisfiedOnly);
 
         Callback callback = new Callback(nativeCallback, "nativeOnScan", 3);
 
         try {
-            int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callback.getAddress(), 0, timeout);
+            final long callBackAddress = callback.getAddress();
+            if(callBackAddress == 0) {
+              throw new IllegalStateException("Too many concurent callbacks, unable to create.");
+            }
+            int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callBackAddress, 0, timeout);
             if (!ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }

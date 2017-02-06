@@ -45,4 +45,14 @@ public interface YaraScanner extends AutoCloseable {
      * @param moduleArgs Module arguments (-x)
      */
     void scan(File file, Map<String, String> moduleArgs);
+  
+   /**
+     * Scan file
+     *
+     * @param file
+     * @param moduleArgs Module arguments (-x)
+     */
+    void scan(File file, Map<String, String> moduleArgs, YaraScanCallback cbk);
+  
+    void finalizeThread();
 }

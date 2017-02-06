@@ -9,6 +9,10 @@ public class YaraImpl implements Yara {
     public YaraCompiler createCompiler() {
         return new YaraCompilerImpl();
     }
+  
+    @Override
+    public void finalizeThread() {
+    }
 
     @Override
     public void close() throws Exception {

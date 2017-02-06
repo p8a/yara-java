@@ -31,10 +31,17 @@ public class YaraLibrary implements Closeable {
     private final native int yr_finalize();
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (library != null) {
             yr_finalize();
             library = null;
+        }
+    }
+  
+    private final native void yr_finalize_thread();
+    public void finalizeThread() {
+        if (library != null) {
+            yr_finalize_thread();
         }
     }
 
