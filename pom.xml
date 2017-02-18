@@ -91,9 +91,6 @@
                         </goals>
                         <configuration>
                             <name>yara-wrapper</name>
-                            <configureArgs>
-                                <arg>LDFLAGS=${jni-with-crypto}</arg>
-                            </configureArgs>
                         </configuration>
                     </execution>
                 </executions>
