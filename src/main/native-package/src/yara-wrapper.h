@@ -142,9 +142,9 @@ yara_match_value(JNIEnv *env, void *v) {
         return 0;
     }
 
-    if (0 != (buffer = malloc(match->match_length + 1))) {
-        memset(buffer, 0, match->match_length + 1);
-        strncpy(buffer, (const char* )match->data, match->match_length);
+    if (0 != (buffer = malloc(match->data_length + 1))) {
+        memset(buffer, 0, match->data_length + 1);
+        strncpy(buffer, (const char* )match->data, match->data_length);
 
         value = cast_jstring(env, buffer);
 
