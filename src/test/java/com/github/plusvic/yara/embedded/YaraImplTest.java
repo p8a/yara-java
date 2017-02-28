@@ -16,6 +16,13 @@ public class YaraImplTest {
         try (YaraImpl yara = new YaraImpl()) {
         }
     }
+  
+    @Test
+    public void testFinalizeThread() throws Exception {
+        try (YaraImpl yara = new YaraImpl()) {
+            yara.finalizeThread();
+        }
+    }
 
     @Test
     public void testCreateCompiler() throws Exception {

@@ -50,6 +50,10 @@ public class YaraScannerImpl implements YaraScanner {
 
     @Override
     public void scan(File file, Map<String, String> moduleArgs) {
+        scan(file, moduleArgs, this.callback);
+    }
+    @Override
+    public void scan(File file, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
         checkArgument(file != null);
 
         if (!file.exists()) {
@@ -57,7 +61,7 @@ public class YaraScannerImpl implements YaraScanner {
         }
 
         try {
-            yara.match(file.toPath(), moduleArgs, callback);
+            yara.match(file.toPath(), moduleArgs, yaraScanCallback);
         } catch (Exception e) {
             throw new YaraException(e.getMessage());
         }
@@ -66,5 +70,8 @@ public class YaraScannerImpl implements YaraScanner {
 
     @Override
     public void close() throws Exception {
+    }
+    @Override
+    public void finalizeThread() {
     }
 }
