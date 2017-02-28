@@ -92,9 +92,6 @@
                         </goals>
                         <configuration>
                             <name>yara-wrapper</name>
-                            <configureArgs>
-                                <arg>LDFLAGS=${jni-with-crypto}</arg>
-                            </configureArgs>
                         </configuration>
                     </execution>
                 </executions>
@@ -172,6 +169,31 @@
     </build>
 
     <profiles>
+      <profile>
+          <id>default</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.fusesource.hawtjni</groupId>
+                      <artifactId>maven-hawtjni-plugin</artifactId>
+                      <configuration>
+                          <osgiPlatforms>
+                              <osgiPlatform>osname=MacOS;processor=x86-64</osgiPlatform>
+                              <osgiPlatform>osname=MacOS;processor=x86</osgiPlatform>
+                              <osgiPlatform>*</osgiPlatform>
+                          </osgiPlatforms>
+                          <configureArgs>
+                              <arg>LDFLAGS=${jni-with-crypto}</arg>
+                          </configureArgs>
+                          <platform>osx</platform>
+                      </configuration>
+                  </plugin>
+              </plugins>
+          </build>
+        </profile>
         <profile>
             <id>mac</id>
             <activation>
