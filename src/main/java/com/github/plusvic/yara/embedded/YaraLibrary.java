@@ -118,6 +118,23 @@ public class YaraLibrary implements Closeable {
         return yr_rules_scan_file(rules, filename, flags, callback, user_data, timeout);
     }
 
+   @JniMethod
+   private final native int yr_rules_scan_mem(
+            @JniArg(cast = "YR_RULES*") long rules,
+            byte[] buffer,
+            int length,
+            int flags,
+            @JniArg(cast = "YR_CALLBACK_FUNC") long callback,
+            @JniArg(cast = "void*") long user_data,
+            int timeout);
+   public int rulesScanMem(long rules, byte[] buffer, int flags, long callback, long user_data, int timeout) {
+        Preconditions.checkState(library != null);
+        return yr_rules_scan_mem(rules, buffer, buffer.length, flags, callback, user_data, timeout);
+   }
+   public int rulesScanMem(long rules, byte[] buffer, int buflen, int flags, long callback, long user_data, int timeout) {
+        Preconditions.checkState(library != null);
+        return yr_rules_scan_mem(rules, buffer, buflen, flags, callback, user_data, timeout);
+   }
 
     /*
         Mapping helpers

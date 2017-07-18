@@ -5,6 +5,8 @@ import com.github.plusvic.yara.YaraException;
 import com.github.plusvic.yara.YaraScanCallback;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.*;
@@ -128,6 +130,52 @@ public class YaraExecutable {
         catch (Throwable t) {
             LOGGER.log(Level.WARNING, "Failed to match rules: {0}", t.getMessage());
             throw t;
+        }
+    }
+
+    public boolean match(byte buffer[], Map<String, String> moduleArgs, YaraScanCallback callback) throws Exception {
+        if (buffer == null || callback == null) {
+            throw new IllegalArgumentException();
+        }
+
+        File ftmp = File.createTempFile("yara-",".dat");
+        try (FileOutputStream fos = new FileOutputStream(ftmp)) {
+            fos.write(buffer);
+        }
+
+        Path target = ftmp.toPath();
+        try {
+            Process process = executable.execute(getCommandLine(target, moduleArgs));
+            process.waitFor(timeout, TimeUnit.SECONDS);
+
+            try (BufferedReader pout = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                 BufferedReader perr  = new BufferedReader(new InputStreamReader(process.getErrorStream())))
+            {
+                String line;
+                while(null != (line = perr.readLine())) {
+                    processError(line);
+                }
+
+                YaraOutputProcessor outputProcessor = new YaraOutputProcessor(callback);
+
+                outputProcessor.onStart();
+                while (null != (line = pout.readLine())) {
+                    outputProcessor.onLine(line);
+                }
+                outputProcessor.onComplete();
+            }
+
+            return true;
+        }
+        catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "Failed to match rules: {0}", t.getMessage());
+            throw t;
+        } finally {
+            if (ftmp != null) {
+                if (! ftmp.delete()) {
+                    LOGGER.log(Level.WARNING, "Failed to delete tmp file {0}", ftmp);
+                }
+            }
         }
     }
 

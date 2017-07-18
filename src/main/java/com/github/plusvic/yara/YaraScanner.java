@@ -45,7 +45,7 @@ public interface YaraScanner extends AutoCloseable {
      * @param moduleArgs Module arguments (-x)
      */
     void scan(File file, Map<String, String> moduleArgs);
-  
+
    /**
      * Scan file
      *
@@ -53,6 +53,29 @@ public interface YaraScanner extends AutoCloseable {
      * @param moduleArgs Module arguments (-x)
      */
     void scan(File file, Map<String, String> moduleArgs, YaraScanCallback cbk);
-  
+
+    /**
+     * Scan memory
+     *
+     * @param buffer
+     */
+    void scan(byte[] buffer);
+
+    /**
+     * Scan memory
+     *
+     * @param buffer
+     * @param moduleArgs Module arguments (-x)
+     */
+    void scan(byte[] buffer, Map<String, String> moduleArgs);
+
+   /**
+     * Scan memory
+     *
+     * @param buffer
+     * @param moduleArgs Module arguments (-x)
+     */
+    void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback cbk);
+
     void finalizeThread();
 }

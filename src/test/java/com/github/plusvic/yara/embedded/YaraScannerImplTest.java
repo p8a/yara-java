@@ -32,9 +32,9 @@ public class YaraScannerImplTest {
             "rule HelloWorld : Hello World\n"+
             "{\n"+
             "\tmeta:\n" +
-            "	my_identifier_1 = \"Some string data\"\n" +
-            "	my_identifier_2 = 24\n" +
-            "	my_identifier_3 = true\n" +
+            "   my_identifier_1 = \"Some string data\"\n" +
+            "   my_identifier_2 = 24\n" +
+            "   my_identifier_3 = true\n" +
             "\tstrings:\n"+
             "\t\t$a = \"Hello world\"\n"+
             "\n"+
@@ -309,8 +309,6 @@ public class YaraScannerImplTest {
         Map<String, String> args = new HashMap();
         args.put("pe", temp.getAbsolutePath());
 
-
-        //
         YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
             @Override
             public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
@@ -337,6 +335,46 @@ public class YaraScannerImplTest {
 
                 scanner.setCallback(scanCallback);
                 scanner.scan(temp, args);
+            }
+        }
+
+        assertTrue(match.get());
+    }
+
+    @Test
+    public void testScanMemMatch() throws Exception {
+        // Make test buffer
+        byte[] buffer = "Hello world".getBytes();
+
+        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
+            @Override
+            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
+                fail();
+            }
+        };
+
+        final AtomicBoolean match = new AtomicBoolean();
+
+        YaraScanCallback scanCallback = new YaraScanCallback() {
+            @Override
+            public void onMatch(YaraRule v) {
+                assertEquals("HelloWorld", v.getIdentifier());
+                assertMetas(v.getMetadata());
+                assertStrings(v.getStrings());
+                assertTags(v.getTags());
+                match.set(true);
+            }
+        };
+
+        // Create compiler and get scanner
+        try (YaraCompiler compiler = yara.createCompiler()) {
+            compiler.setCallback(compileCallback);
+            compiler.addRulesContent(YARA_RULES, null);
+
+            try (YaraScanner scanner = compiler.createScanner()) {
+                assertNotNull(scanner);
+                scanner.setCallback(scanCallback);
+                scanner.scan(buffer);
             }
         }
 

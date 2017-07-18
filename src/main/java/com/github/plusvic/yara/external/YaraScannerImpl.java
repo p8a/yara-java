@@ -69,8 +69,30 @@ public class YaraScannerImpl implements YaraScanner {
     }
 
     @Override
+    public void scan(byte[] buffer) {
+        scan(buffer, null);
+    }
+
+    @Override
+    public void scan(byte[] buffer, Map<String, String> moduleArgs) {
+        scan(buffer, moduleArgs, this.callback);
+    }
+
+    @Override
+    public void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
+        checkArgument(buffer != null);
+
+        try {
+            yara.match(buffer, moduleArgs, yaraScanCallback);
+        } catch (Exception e) {
+            throw new YaraException(e.getMessage());
+        }
+    }
+
+    @Override
     public void close() throws Exception {
     }
+
     @Override
     public void finalizeThread() {
     }
