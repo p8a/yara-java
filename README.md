@@ -23,7 +23,7 @@ git clone https://github.com/virustotal/yara.git
 cd yara
 git checkout tags/v3.5.0
 ./bootstrap.sh
-./configure
+./configure --without-crypto CFLAGS=-fPIC
 make
 ```
 
