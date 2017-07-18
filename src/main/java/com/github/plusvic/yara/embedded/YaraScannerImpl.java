@@ -122,7 +122,7 @@ public class YaraScannerImpl implements YaraScanner {
     public void finalizeThread() {
          if (library != null) {
             library.finalizeThread();
-        }   
+        }
     }
 
     /**
@@ -166,7 +166,7 @@ public class YaraScannerImpl implements YaraScanner {
     public void scan(File file) {
         scan(file, null);
     }
-  
+
     /**
      * Scan file
      * @param file
@@ -230,4 +230,78 @@ public class YaraScannerImpl implements YaraScanner {
             loadedModules.forEach( module -> module.unloadData());
         }
     }
+
+    /**
+     * Scan buffer
+     *
+     * @param buffer
+     */
+    public void scan(byte[] buffer) {
+        scan(buffer, null);
+    }
+
+    /**
+     * Scan buffer
+     * @param buffer
+     * @param moduleArgs Module arguments (-x)
+     */
+    @Override
+    public void scan(byte[] buffer, Map<String, String> moduleArgs) {
+        scan(buffer, moduleArgs, this.scanCallback);
+    }
+
+    /**
+     * Scan buffer
+     * <br>Use this method for multithreaded operation. When calling this
+     * method it is not necessary to set any parameters on the YaraScanner object
+     * @param buffer
+     * @param moduleArgs Module arguments (-x)
+     */
+    @Override
+    public void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
+        Set<YaraModule> loadedModules = new HashSet<>();
+
+        YaraModuleCallback moduleCallback = null;
+
+        if (moduleArgs != null) {
+            moduleCallback = module -> {
+                String name = module.getName();
+
+                if (moduleArgs.containsKey(name)) {
+                    if (module.loadData(moduleArgs.get(name))) {
+                        LOGGER.log(Level.FINE, MessageFormat.format("Loaded module {0} data from {1}",
+                                name, moduleArgs.get(name)));
+
+                        loadedModules.add(module);
+                    }
+                    else {
+                        LOGGER.log(Level.WARNING, MessageFormat.format("Failed to load module {0} data from {1}",
+                                name, moduleArgs.get(name)));
+                    }
+                }
+            };
+        }
+
+        NativeScanCallback nativeCallback = new NativeScanCallback(library, yaraScanCallback, moduleCallback);
+        nativeCallback.setMaxRules(maxRules);
+        nativeCallback.setNegate(notSatisfiedOnly);
+
+        Callback callback = new Callback(nativeCallback, "nativeOnScan", 3);
+
+        try {
+            final long callBackAddress = callback.getAddress();
+            if(callBackAddress == 0) {
+              throw new IllegalStateException("Too many concurent callbacks, unable to create.");
+            }
+            int ret = library.rulesScanMem(peer, buffer, 0, callBackAddress, 0, timeout);
+            if (!ErrorCode.isSuccess(ret)) {
+                throw new YaraException(ret);
+            }
+        }
+        finally {
+            callback.dispose();
+            loadedModules.forEach( module -> module.unloadData());
+        }
+    }
+
 }
