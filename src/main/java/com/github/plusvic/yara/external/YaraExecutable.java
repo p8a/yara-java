@@ -89,20 +89,15 @@ public class YaraExecutable {
         }
 
         // rules
-        if (rules.size() > 1) {
-            for (Path path : rules) {
-                if (path.endsWith(Utils.compiledRuleIdentifier)) {
-                    throw new IllegalArgumentException("may only scan with multiple rules if none are compiled");
-                }
-            }
-        }
-
         if (rules.size() == 1 && rules.iterator().next().toAbsolutePath().toString().endsWith(Utils.compiledRuleIdentifier)) {
             // -C flag is required when scanning with a compiled rule
             args.add("-C");
         }
 
         for (Path path : rules) {
+            if (rules.size() > 1 && path.endsWith(Utils.compiledRuleIdentifier)) {
+                throw new IllegalArgumentException("may only scan with multiple rules when none are compiled");
+            }
             args.add(path.toAbsolutePath().toString());
         }
 
