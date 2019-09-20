@@ -95,9 +95,6 @@ public class YaraExecutable {
         }
 
         for (Path path : rules) {
-            if (rules.size() > 1 && path.endsWith(Utils.compiledRuleIdentifier)) {
-                throw new IllegalArgumentException("may only scan with multiple rules when none are compiled");
-            }
             args.add(path.toAbsolutePath().toString());
         }
 
