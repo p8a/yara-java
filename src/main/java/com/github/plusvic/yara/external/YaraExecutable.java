@@ -188,7 +188,6 @@ public class YaraExecutable {
     }
 
     private void processError(String line) {
-
         throw new YaraException(line);
     }
 }
