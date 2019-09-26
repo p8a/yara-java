@@ -116,7 +116,9 @@ public class YaraCompilerImpl implements YaraCompiler {
      * @param namespace
      */
     public void addRulesFile(String filePath, String fileName, String namespace) {
+        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE compiler begin addRulesFile for {0}", filePath));
         int ret  = library.compilerAddFile(peer, filePath, namespace, fileName);
+        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE compiler end addRulesFile for {0} with ret {1}", filePath, ret));
         if (ret != ErrorCode.SUCCESS.getValue()) {
             throw new YaraException(ret);
         }
@@ -133,6 +135,9 @@ public class YaraCompilerImpl implements YaraCompiler {
         checkArgument(Files.exists(Paths.get(packagePath)));
 
         LOGGER.fine(String.format("Loading package: %s", packagePath));
+
+        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE compiler load rules package for for {0}", packagePath));
+
 
         try (ZipFile zf = new ZipFile(packagePath)) {
 
@@ -159,6 +164,8 @@ public class YaraCompilerImpl implements YaraCompiler {
 
                 // Add content
                 addRulesContent(content.toString(), namespace);
+
+                LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE compiler loaded rules package for for {0}", packagePath));
             }
         }
         catch (IOException ioe) {

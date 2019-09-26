@@ -63,6 +63,7 @@ public class YaraScannerImpl implements YaraScanner {
 
                 if (scanCallback != null) {
                     YaraRuleImpl rule = new YaraRuleImpl(library, message);
+                    LOGGER.info(String.format("YARATRACE callback rule hit case 1: %s", rule.getIdentifier()));
                     scanCallback.onMatch(rule);
                 }
             }
@@ -71,17 +72,20 @@ public class YaraScannerImpl implements YaraScanner {
 
                 if (scanCallback != null) {
                     YaraRuleImpl rule = new YaraRuleImpl(library, message);
+                    LOGGER.info(String.format("YARATRACE callback rule hit case 2: %s", rule.getIdentifier()));
                     scanCallback.onMatch(rule);
                 }
             }
             else if (type == CALLBACK_MSG_IMPORT_MODULE) {
                 if (moduleCallback != null) {
                     YaraModule module = new YaraModule(library, message);
+                    LOGGER.info(String.format("YARATRACE module load: %s", module.getName()));
                     moduleCallback.onImport(module);
                 }
             }
 
             if (maxRules > 0 && count >= maxRules) {
+                LOGGER.info("YARATRACE callback abort for max rules hit");
                 return CALLBACK_ABORT;
             }
 
@@ -196,13 +200,13 @@ public class YaraScannerImpl implements YaraScanner {
 
                 if (moduleArgs.containsKey(name)) {
                     if (module.loadData(moduleArgs.get(name))) {
-                        LOGGER.log(Level.FINE, MessageFormat.format("Loaded module {0} data from {1}",
+                        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE Loaded module {0} data from {1}",
                                 name, moduleArgs.get(name)));
 
                         loadedModules.add(module);
                     }
                     else {
-                        LOGGER.log(Level.WARNING, MessageFormat.format("Failed to load module {0} data from {1}",
+                        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE  Failed to load module {0} data from {1}",
                                 name, moduleArgs.get(name)));
                     }
                 }
@@ -220,7 +224,9 @@ public class YaraScannerImpl implements YaraScanner {
             if(callBackAddress == 0) {
               throw new IllegalStateException("Too many concurent callbacks, unable to create.");
             }
+            LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE begin rules scan file for {0}", file.getAbsolutePath()));
             int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callBackAddress, 0, timeout);
+            LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE finished startign rules scan file for {0} with ret {1}", file.getAbsolutePath(), ret));
             if (!ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }
@@ -260,6 +266,7 @@ public class YaraScannerImpl implements YaraScanner {
     @Override
     public void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
         Set<YaraModule> loadedModules = new HashSet<>();
+        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE SCANNING MEMORY"));
 
         YaraModuleCallback moduleCallback = null;
 
