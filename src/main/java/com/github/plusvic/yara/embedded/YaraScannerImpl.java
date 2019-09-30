@@ -224,16 +224,17 @@ public class YaraScannerImpl implements YaraScanner {
             if(callBackAddress == 0) {
               throw new IllegalStateException("Too many concurent callbacks, unable to create.");
             }
-            LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE begin rules scan file for {0}", file.getAbsolutePath()));
+            LOGGER.log(Level.INFO, "YARATRACE BEGIN RULES SCAN");
             int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callBackAddress, 0, timeout);
-            LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE finished startign rules scan file for {0} with ret {1}", file.getAbsolutePath(), ret));
             if (!ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }
         }
         finally {
+            LOGGER.log(Level.INFO, "YARATRACE END RULES SCAN");
             callback.dispose();
             loadedModules.forEach( module -> module.unloadData());
+            LOGGER.log(Level.INFO, "YARATRACE END RULES SCAN CALLBACKS DONE");
         }
     }
 
@@ -266,8 +267,6 @@ public class YaraScannerImpl implements YaraScanner {
     @Override
     public void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
         Set<YaraModule> loadedModules = new HashSet<>();
-        LOGGER.log(Level.INFO, "YARATRACE SCANNING MEMORY");
-
         YaraModuleCallback moduleCallback = null;
 
         if (moduleArgs != null) {
@@ -300,14 +299,17 @@ public class YaraScannerImpl implements YaraScanner {
             if(callBackAddress == 0) {
               throw new IllegalStateException("Too many concurent callbacks, unable to create.");
             }
+            LOGGER.log(Level.INFO, "YARATRACE SCANNING MEMORY");
             int ret = library.rulesScanMem(peer, buffer, 0, callBackAddress, 0, timeout);
             if (!ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }
         }
         finally {
+            LOGGER.log(Level.INFO, "YARATRACE SCANNED MEMORY");
             callback.dispose();
             loadedModules.forEach( module -> module.unloadData());
+            LOGGER.log(Level.INFO, "YARATRACE SCANNED MEMORY CALLBACKS DONE");
         }
     }
 
