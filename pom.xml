@@ -184,7 +184,7 @@
                       <artifactId>maven-hawtjni-plugin</artifactId>
                       <configuration>
                           <configureArgs>
-                              <arg>LDFLAGS=${env.LDFLAGS} ${jni-with-crypto}</arg>
+                              <arg>LDFLAGS=${jni-with-crypto}</arg>
                           </configureArgs>
                           <platform>linux86</platform>
                       </configuration>
@@ -212,7 +212,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--with-universal=x86_64</arg>
-                                <arg>LDFLAGS=${env.LDFLAGS} ${jni-with-crypto}</arg>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>osx</platform>
                         </configuration>
@@ -241,7 +241,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--libdir=${project.build.directory}/native-build/target/lib</arg>
-                                <arg>LDFLAGS=${env.LDFLAGS} ${jni-with-crypto}</arg>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>linux64</platform>
                         </configuration>
