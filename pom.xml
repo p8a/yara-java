@@ -22,7 +22,6 @@
         <hawtjni-verbose>true</hawtjni-verbose>
         <easymock-version>3.2</easymock-version>
         <jni-with-crypto>-lcrypto</jni-with-crypto>
-        <yara-configure-args></yara-configure-args>
     </properties>
 
     <dependencies>
@@ -118,8 +117,8 @@
                                 <copy file="${project.basedir}/../yarac"
                                       tofile="${project.build.directory}/generated-sources/hawtjni/lib/META-INF/native/${toString:platform}/yarac"/>
                                 <jar destfile="${project.build.directory}/${project.artifactId}-${project.version}-${toString:platform}.jar"
-                                        basedir="${project.build.directory}/generated-sources/hawtjni/lib/"
-                                        update="true">
+                                     basedir="${project.build.directory}/generated-sources/hawtjni/lib/"
+                                     update="true">
                                 </jar>
                             </target>
                         </configuration>
@@ -170,28 +169,28 @@
     </build>
 
     <profiles>
-      <profile>
-          <id>default</id>
-          <activation>
-            <activeByDefault>true</activeByDefault>
-            <os>
-               <family>Linux</family>
-             </os>
-          </activation>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.fusesource.hawtjni</groupId>
-                      <artifactId>maven-hawtjni-plugin</artifactId>
-                      <configuration>
-                          <configureArgs>
-                              <arg>${yara-configure-args} LDFLAGS=${jni-with-crypto}</arg>
-                          </configureArgs>
-                          <platform>linux86</platform>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <os>
+                    <family>Linux</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.fusesource.hawtjni</groupId>
+                        <artifactId>maven-hawtjni-plugin</artifactId>
+                        <configuration>
+                            <configureArgs>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
+                            </configureArgs>
+                            <platform>linux86</platform>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>mac</id>
@@ -213,7 +212,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--with-universal=x86_64</arg>
-                                <arg>${yara-configure-args} LDFLAGS=${jni-with-crypto}</arg>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>osx</platform>
                         </configuration>
@@ -242,7 +241,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--libdir=${project.build.directory}/native-build/target/lib</arg>
-                                <arg>${yara-configure-args} LDFLAGS=${jni-with-crypto}</arg>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>linux64</platform>
                         </configuration>
