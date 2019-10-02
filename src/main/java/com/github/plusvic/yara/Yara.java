@@ -6,5 +6,4 @@ package com.github.plusvic.yara;
 public interface Yara extends AutoCloseable {
     YaraCompiler createCompiler();
   
-    void finalizeThread();
 }

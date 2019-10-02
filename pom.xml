@@ -22,6 +22,7 @@
         <hawtjni-verbose>true</hawtjni-verbose>
         <easymock-version>3.2</easymock-version>
         <jni-with-crypto>-lcrypto</jni-with-crypto>
+        <yara-configure-args></yara-configure-args>
     </properties>
 
     <dependencies>
@@ -184,7 +185,7 @@
                       <artifactId>maven-hawtjni-plugin</artifactId>
                       <configuration>
                           <configureArgs>
-                              <arg>LDFLAGS=${jni-with-crypto}</arg>
+                              <arg>${yara-configure-args} LDFLAGS=${jni-with-crypto}</arg>
                           </configureArgs>
                           <platform>linux86</platform>
                       </configuration>
@@ -212,7 +213,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--with-universal=x86_64</arg>
-                                <arg>LDFLAGS=${jni-with-crypto}</arg>
+                                <arg>${yara-configure-args} LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>osx</platform>
                         </configuration>
@@ -241,7 +242,7 @@
                             </osgiPlatforms>
                             <configureArgs>
                                 <arg>--libdir=${project.build.directory}/native-build/target/lib</arg>
-                                <arg>LDFLAGS=${jni-with-crypto}</arg>
+                                <arg>${yara-configure-args} LDFLAGS=${jni-with-crypto}</arg>
                             </configureArgs>
                             <platform>linux64</platform>
                         </configuration>

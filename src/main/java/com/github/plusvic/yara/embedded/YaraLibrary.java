@@ -37,13 +37,6 @@ public class YaraLibrary implements Closeable {
             library = null;
         }
     }
-  
-    private final native void yr_finalize_thread();
-    public void finalizeThread() {
-        if (library != null) {
-            yr_finalize_thread();
-        }
-    }
 
     /*
         Compilation

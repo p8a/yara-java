@@ -122,12 +122,6 @@ public class YaraScannerImpl implements YaraScanner {
         }
         library = null;
     }
-    @Override
-    public void finalizeThread() {
-         if (library != null) {
-            library.finalizeThread();
-        }
-    }
 
     /**
      * Set scan timeout

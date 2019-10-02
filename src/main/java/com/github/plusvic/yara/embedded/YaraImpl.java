@@ -32,11 +32,6 @@ public class YaraImpl implements Yara {
 
         return new YaraCompilerImpl(this.library, compiler[0]);
     }
-  
-    @Override
-    public void finalizeThread() {
-        library.finalizeThread();
-    }
 
     @Override
     public void close() throws Exception {
