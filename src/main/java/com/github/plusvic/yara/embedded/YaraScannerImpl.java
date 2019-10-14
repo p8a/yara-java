@@ -260,7 +260,7 @@ public class YaraScannerImpl implements YaraScanner {
     @Override
     public void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback yaraScanCallback) {
         Set<YaraModule> loadedModules = new HashSet<>();
-        LOGGER.log(Level.INFO, "YARATRACE SCANNING MEMORY");
+        LOGGER.log(Level.INFO, MessageFormat.format("YARATRACE SCANNING MEMORY"));
 
         YaraModuleCallback moduleCallback = null;
 
