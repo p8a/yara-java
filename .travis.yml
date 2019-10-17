@@ -11,7 +11,7 @@ before_install:
   - cd yara
   - git checkout tags/v3.10.0
   - ./bootstrap.sh
-  - ./configure --without-crypto CFLAGS=-fPIC
+  - ./configure --without-crypto --disable-shared CFLAGS=-fPIC
   - make
 
 install:

@@ -23,7 +23,7 @@ git clone https://github.com/virustotal/yara.git
 cd yara
 git checkout tags/v3.10.0
 ./bootstrap.sh
-./configure
+./configure --disable-shared
 make
 ```
 
