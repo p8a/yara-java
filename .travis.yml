@@ -6,6 +6,9 @@ jdk:
 os:
   - linux
 
+dist:
+  trusty
+
 before_install:
   - git clone https://github.com/virustotal/yara.git
   - cd yara
