@@ -77,5 +77,4 @@ public interface YaraScanner extends AutoCloseable {
      */
     void scan(byte[] buffer, Map<String, String> moduleArgs, YaraScanCallback cbk);
 
-    void finalizeThread();
 }

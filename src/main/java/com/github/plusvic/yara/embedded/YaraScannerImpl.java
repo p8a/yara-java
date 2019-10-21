@@ -29,6 +29,10 @@ public class YaraScannerImpl implements YaraScanner {
     private static final long CALLBACK_MSG_SCAN_FINISHED = 3;
     private static final long CALLBACK_MSG_IMPORT_MODULE = 4;
 
+    private static final int SCAN_FLAGS_FAST_MODE = 0x00000001;
+    private static final int SCAN_FLAGS_PROCESS_MEMORY = 0x00000002;
+    private static final int SCAN_FLAGS_NO_TRYCATCH = 0x00000004;
+
     private class NativeScanCallback {
         private boolean negate = false;
         private int maxRules = 0;
@@ -117,12 +121,6 @@ public class YaraScannerImpl implements YaraScanner {
             peer = 0;
         }
         library = null;
-    }
-    @Override
-    public void finalizeThread() {
-         if (library != null) {
-            library.finalizeThread();
-        }
     }
 
     /**
@@ -220,7 +218,7 @@ public class YaraScannerImpl implements YaraScanner {
             if(callBackAddress == 0) {
               throw new IllegalStateException("Too many concurent callbacks, unable to create.");
             }
-            int ret = library.rulesScanFile(peer, file.getAbsolutePath(), 0, callBackAddress, 0, timeout);
+            int ret = library.rulesScanFile(peer, file.getAbsolutePath(), SCAN_FLAGS_NO_TRYCATCH, callBackAddress, 0, timeout);
             if (!ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }
@@ -293,7 +291,7 @@ public class YaraScannerImpl implements YaraScanner {
             if(callBackAddress == 0) {
               throw new IllegalStateException("Too many concurent callbacks, unable to create.");
             }
-            int ret = library.rulesScanMem(peer, buffer, 0, callBackAddress, 0, timeout);
+            int ret = library.rulesScanMem(peer, buffer, SCAN_FLAGS_NO_TRYCATCH, callBackAddress, 0, timeout);
             if (!ErrorCode.isSuccess(ret)) {
                 throw new YaraException(ret);
             }

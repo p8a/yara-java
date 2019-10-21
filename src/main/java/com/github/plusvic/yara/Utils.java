@@ -78,4 +78,6 @@ public class Utils {
 
         return buffer.toString();
     }
+
+    public static String compiledRuleIdentifier = "yaracc";
 }

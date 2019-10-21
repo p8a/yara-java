@@ -7,7 +7,7 @@
 
     <artifactId>libyara</artifactId>
     <groupId>com.github.plusvic</groupId>
-    <version>3.5.0-SNAPSHOT</version>
+    <version>3.10.0-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -117,8 +117,8 @@
                                 <copy file="${project.basedir}/../yarac"
                                       tofile="${project.build.directory}/generated-sources/hawtjni/lib/META-INF/native/${toString:platform}/yarac"/>
                                 <jar destfile="${project.build.directory}/${project.artifactId}-${project.version}-${toString:platform}.jar"
-                                        basedir="${project.build.directory}/generated-sources/hawtjni/lib/"
-                                        update="true">
+                                     basedir="${project.build.directory}/generated-sources/hawtjni/lib/"
+                                     update="true">
                                 </jar>
                             </target>
                         </configuration>
@@ -169,28 +169,28 @@
     </build>
 
     <profiles>
-      <profile>
-          <id>default</id>
-          <activation>
-            <activeByDefault>true</activeByDefault>
-            <os>
-               <family>Linux</family>
-             </os>
-          </activation>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.fusesource.hawtjni</groupId>
-                      <artifactId>maven-hawtjni-plugin</artifactId>
-                      <configuration>
-                          <configureArgs>
-                              <arg>LDFLAGS=${jni-with-crypto}</arg>
-                          </configureArgs>
-                          <platform>linux86</platform>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <os>
+                    <family>Linux</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.fusesource.hawtjni</groupId>
+                        <artifactId>maven-hawtjni-plugin</artifactId>
+                        <configuration>
+                            <configureArgs>
+                                <arg>LDFLAGS=${jni-with-crypto}</arg>
+                            </configureArgs>
+                            <platform>linux86</platform>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>mac</id>

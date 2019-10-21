@@ -92,8 +92,4 @@ public class YaraScannerImpl implements YaraScanner {
     @Override
     public void close() throws Exception {
     }
-
-    @Override
-    public void finalizeThread() {
-    }
 }

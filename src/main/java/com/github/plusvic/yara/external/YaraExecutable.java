@@ -89,6 +89,11 @@ public class YaraExecutable {
         }
 
         // rules
+        if (rules.size() == 1 && rules.iterator().next().toAbsolutePath().toString().endsWith(Utils.compiledRuleIdentifier)) {
+            // -C flag is required when scanning with a compiled rule
+            args.add("-C");
+        }
+
         for (Path path : rules) {
             args.add(path.toAbsolutePath().toString());
         }

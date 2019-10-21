@@ -96,7 +96,7 @@ public class YaracExecutable {
         }
 
         try {
-            Path output = File.createTempFile(UUID.randomUUID().toString(), "yaracc").toPath();
+            Path output = File.createTempFile(UUID.randomUUID().toString(), Utils.compiledRuleIdentifier).toPath();
 
             Process process = executable.execute(getCommandLine(output));
             process.waitFor(timeout, TimeUnit.SECONDS);
