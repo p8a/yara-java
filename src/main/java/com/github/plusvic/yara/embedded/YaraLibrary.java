@@ -55,7 +55,7 @@ public class YaraLibrary implements Closeable {
 
     private final native void yr_compiler_set_callback(
             @JniArg(cast = "YR_COMPILER*") long compiler,
-            @JniArg(cast = "void (*)(int, const char*, int, const char*,void*)", flags = ArgFlag.POINTER_ARG) long callback,
+            @JniArg(cast = "void (*)(int, const char*, int, const YR_RULE* rule, const char*,void*)", flags = ArgFlag.POINTER_ARG) long callback,
             @JniArg(cast = "void *") long data
     );
     public void compilerSetCallback(long compiler, long callback, long data) {
@@ -227,13 +227,18 @@ public class YaraLibrary implements Closeable {
         return yara_string_identifier(null, pv);
     }
 
-    private final native long yara_string_matches(JNIEnv env, @JniArg(cast = "void*") long pv);
-    public long stringMatches(long pv) {
+    private final native long yara_string_matches(
+        JNIEnv env, 
+        @JniArg(cast = "void*") long context,
+        @JniArg(cast = "void*") long pv);
+    public long stringMatches(long context, long pv) {
         Preconditions.checkState(library != null);
-        return yara_string_matches(null, pv);
+        return yara_string_matches(null, context, pv);
     }
 
-    private final native long yara_string_match_next(JNIEnv env, @JniArg(cast = "void*") long pv);
+    private final native long yara_string_match_next(
+        JNIEnv env, 
+        @JniArg(cast = "void*") long pv);
     public long stringMatchNext(long pv) {
         Preconditions.checkState(library != null);
         return yara_string_match_next(null, pv);

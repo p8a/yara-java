@@ -11,13 +11,16 @@ import static com.github.plusvic.yara.Preconditions.checkArgument;
  */
 public class YaraRuleImpl implements YaraRule {
     private final YaraLibrary library;
+    private final long context;
     private final long peer;
 
-    YaraRuleImpl(YaraLibrary library, long peer) {
+    YaraRuleImpl(YaraLibrary library, long context, long peer) {
         checkArgument(library != null);
+        checkArgument(context != 0);
         checkArgument(peer != 0);
 
         this.library = library;
+        this.context = context;
         this.peer = peer;
     }
 
@@ -64,12 +67,12 @@ public class YaraRuleImpl implements YaraRule {
 
             @Override
             protected YaraMetaImpl getNext() {
-                long last = index;
-                index = library.ruleMetaNext(index);
-
-                if (index == 0 || last == 0) {
+                if (index == 0){
                     return null;
                 }
+
+                long last = index;
+                index = library.ruleMetaNext(index);
 
                 return new YaraMetaImpl(library, last);
             }
@@ -87,14 +90,14 @@ public class YaraRuleImpl implements YaraRule {
 
             @Override
             protected YaraStringImpl getNext() {
-                long last = index;
-                index = library.ruleStringNext(index);
-
-                if (index == 0 || last == 0) {
+                if (index == 0){
                     return null;
                 }
 
-                return new YaraStringImpl(library, last);
+                long last = index;
+                index = library.ruleStringNext(index);
+
+                return new YaraStringImpl(library, context, last);
             }
         };
     }

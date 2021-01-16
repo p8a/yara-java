@@ -13,13 +13,16 @@ import static com.github.plusvic.yara.Preconditions.checkArgument;
  */
 public class YaraStringImpl implements YaraString {
     private final YaraLibrary library;
+    private final long context;
     private final long peer;
 
-    YaraStringImpl(YaraLibrary library, long peer) {
+    YaraStringImpl(YaraLibrary library, long context, long peer) {
         checkArgument(library != null);
+        checkArgument(context != 0);
         checkArgument(peer != 0);
 
         this.library = library;
+        this.context = context;
         this.peer = peer;
     }
 
@@ -39,7 +42,7 @@ public class YaraStringImpl implements YaraString {
      */
     public Iterator<YaraMatch> getMatches() {
         return new GenericIterator<YaraMatch>() {
-            private long index = library.stringMatches(peer);
+            private long index = library.stringMatches(context, peer);
 
             @Override
             protected YaraMatchImpl getNext() {

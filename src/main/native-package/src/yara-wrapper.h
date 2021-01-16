@@ -62,10 +62,10 @@ static void*
 yara_rule_meta_next(JNIEnv *env, void *v) {
     YR_META *meta = (YR_META *)v;
 
-    if (META_IS_NULL(meta)) {
+    if (NULL == meta) {
         return 0;
     }
-    return ++meta;
+    return META_IS_LAST_IN_RULE(meta) ? NULL : ++meta;
 }
 
 static int
@@ -102,10 +102,10 @@ static void*
 yara_rule_string_next(JNIEnv *env, void *v) {
     YR_STRING *string = (YR_STRING *)v;
 
-    if (STRING_IS_NULL(string)) {
+    if (NULL == string) {
         return 0;
     }
-    return ++string;
+    return STRING_IS_LAST_IN_RULE(string) ? NULL : ++string;
 }
 
 static jstring
@@ -115,15 +115,25 @@ yara_string_identifier(JNIEnv *env, void *v) {
 }
 
 static void*
-yara_string_matches(JNIEnv *env, void *v) {
+yara_string_matches(JNIEnv *env, void *context, void *v) {
     YR_STRING *string = (YR_STRING *)v;
-    return (string ? STRING_MATCHES(string).head : NULL);
+    YR_MATCHES* matches = ((YR_SCAN_CONTEXT*)context)->matches;
+    return matches[string->idx].head;
 }
 
 static void*
 yara_string_match_next(JNIEnv *env, void *v) {
-    return !v ? 0 :
-            ((YR_MATCH *)v)->next;
+    YR_MATCH *match = (YR_MATCH *)v;
+
+    if(NULL == match) {
+        return 0;
+    }
+
+    while(match->is_private){
+        match = match->next;
+    }
+
+    return match->next;
 }
 
 static int64_t
