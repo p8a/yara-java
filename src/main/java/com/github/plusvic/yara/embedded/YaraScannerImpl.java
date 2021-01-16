@@ -61,12 +61,12 @@ public class YaraScannerImpl implements YaraScanner {
             this.maxRules = count;
         }
 
-        long nativeOnScan(long type, long message, long data) {
+        long nativeOnScan(long context, long type, long message, long data) {
             if (!negate && type == CALLBACK_MSG_RULE_MATCHING) {
                 ++count;
 
                 if (scanCallback != null) {
-                    YaraRuleImpl rule = new YaraRuleImpl(library, message);
+                    YaraRuleImpl rule = new YaraRuleImpl(library, context, message);
                     scanCallback.onMatch(rule);
                 }
             }
@@ -74,7 +74,7 @@ public class YaraScannerImpl implements YaraScanner {
                 ++count;
 
                 if (scanCallback != null) {
-                    YaraRuleImpl rule = new YaraRuleImpl(library, message);
+                    YaraRuleImpl rule = new YaraRuleImpl(library, context, message);
                     scanCallback.onMatch(rule);
                 }
             }
@@ -211,7 +211,7 @@ public class YaraScannerImpl implements YaraScanner {
         nativeCallback.setMaxRules(maxRules);
         nativeCallback.setNegate(notSatisfiedOnly);
 
-        Callback callback = new Callback(nativeCallback, "nativeOnScan", 3);
+        Callback callback = new Callback(nativeCallback, "nativeOnScan", 4);
 
         try {
             final long callBackAddress = callback.getAddress();
@@ -284,7 +284,7 @@ public class YaraScannerImpl implements YaraScanner {
         nativeCallback.setMaxRules(maxRules);
         nativeCallback.setNegate(notSatisfiedOnly);
 
-        Callback callback = new Callback(nativeCallback, "nativeOnScan", 3);
+        Callback callback = new Callback(nativeCallback, "nativeOnScan", 4);
 
         try {
             final long callBackAddress = callback.getAddress();
