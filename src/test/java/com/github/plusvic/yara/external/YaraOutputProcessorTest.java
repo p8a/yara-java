@@ -1,15 +1,20 @@
 package com.github.plusvic.yara.external;
 
 import com.github.plusvic.yara.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.easymock.EasyMock.createNiceMock;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+
 
 /**
  * User: pba
@@ -17,24 +22,19 @@ import static org.junit.Assert.*;
  * Time: 3:56 PM
  */
 public class YaraOutputProcessorTest {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateNull() {
-        new YaraOutputProcessor(null);
+        assertThrows(IllegalArgumentException.class, () -> new YaraOutputProcessor(null));
     }
 
     @Test
     public void testCreate() {
-        new YaraOutputProcessor(createNiceMock(YaraScanCallback.class));
+        new YaraOutputProcessor(mock(YaraScanCallback.class));
     }
 
     @Test
     public void testStartComplete() {
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                fail();
-            }
-        };
+        YaraScanCallback callback = rule -> fail();
 
         YaraOutputProcessor processor = new YaraOutputProcessor(callback);
         processor.onStart();
@@ -45,12 +45,7 @@ public class YaraOutputProcessorTest {
     public void testRuleNoMeta() {
         final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
 
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                captureRule.set(rule);
-            }
-        };
+        YaraScanCallback callback = captureRule::set;
 
         String value = "HelloWorld [] []";
 
@@ -69,12 +64,7 @@ public class YaraOutputProcessorTest {
     public void testRuleTags() {
         final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
 
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                captureRule.set(rule);
-            }
-        };
+        YaraScanCallback callback = captureRule::set;
 
         String value = "HelloWorld [One,Two,Three] []";
 
@@ -103,12 +93,7 @@ public class YaraOutputProcessorTest {
     public void testRuleMeta() {
         final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
 
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                captureRule.set(rule);
-            }
-        };
+        YaraScanCallback callback = captureRule::set;
 
         String value = "HelloWorld [] [name=\"InstallsDriver\",description=\"The file attempted to install a driver\"]";
 
@@ -140,12 +125,7 @@ public class YaraOutputProcessorTest {
     public void testRuleMetaAll() {
         final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
 
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                captureRule.set(rule);
-            }
-        };
+        YaraScanCallback callback = captureRule::set;
 
         String value = "HelloWorld [] [string=\"String\",number=1,boolean=true]";
 
@@ -181,12 +161,7 @@ public class YaraOutputProcessorTest {
     public void testRuleMetaUgly() {
         final AtomicReference<YaraRule> captureRule = new AtomicReference<>();
 
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                captureRule.set(rule);
-            }
-        };
+        YaraScanCallback callback = captureRule::set;
 
         String value = "HelloWorld [One] [name=\"InstallsDriver\"," +
                 "description=\"The file attempted to install a driver\"," +
@@ -248,12 +223,7 @@ public class YaraOutputProcessorTest {
     public void testRuleMultiple() {
         final List<YaraRule> rules =new ArrayList<>();
 
-        YaraScanCallback callback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule rule) {
-                rules.add(rule);
-            }
-        };
+        YaraScanCallback callback = rules::add;
 
         String[] lines = new String[] {
                 "HelloWorld [] [name=\"InstallsDriver\",description=\"The file attempted to install a driver\"] test.bla",

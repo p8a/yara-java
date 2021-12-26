@@ -1,7 +1,7 @@
 package com.github.plusvic.yara.external;
 
 import com.github.plusvic.yara.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -13,7 +13,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * User: pba
@@ -55,35 +60,28 @@ public class YaraCompilerTest {
         new YaraCompilerImpl();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSetNullCallback() {
-         new YaraCompilerImpl().setCallback(null);
+        YaraCompilerImpl impl = new YaraCompilerImpl();
+        assertThrows(IllegalArgumentException.class, () -> impl.setCallback(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddNullRule() {
-        new YaraCompilerImpl().addRulesContent(null, null);
+        YaraCompilerImpl yaraCompiler = new YaraCompilerImpl();
+        assertThrows(IllegalArgumentException.class, () -> yaraCompiler.addRulesContent(null, null));
     }
 
     @Test
     public void testSetCallback() throws Exception {
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
-            compiler.setCallback(new YaraCompilationCallback() {
-                @Override
-                public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                }
-            });
+            compiler.setCallback((errorLevel, fileName, lineNumber, message) -> {});
         }
     }
 
     @Test
     public void testAddRulesContentSucceeds() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(callback);
@@ -94,13 +92,10 @@ public class YaraCompilerTest {
     @Test
     public void testAddRulesContentFails() throws Exception {
         final AtomicBoolean called = new AtomicBoolean();
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                called.set(true);
-                LOGGER.log(Level.INFO, String.format("Compilation failed in %s at %d: %s",
-                        fileName, lineNumber, message));
-            }
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> {
+            called.set(true);
+            LOGGER.log(Level.INFO, String.format("Compilation failed in %s at %d: %s",
+                    fileName, lineNumber, message));
         };
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
@@ -119,12 +114,7 @@ public class YaraCompilerTest {
 
     @Test
     public void testAddRulesFileSucceeds() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
 
         Path rule = File.createTempFile(UUID.randomUUID().toString(), "yara")
@@ -138,19 +128,15 @@ public class YaraCompilerTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddRulesFileFails() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> {};
 
         String rule = UUID.randomUUID().toString();
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(callback);
-            compiler.addRulesFile(rule, rule, null);
+            assertThrows(IllegalArgumentException.class, () -> compiler.addRulesFile(rule, rule, null));
         }
     }
 
@@ -158,12 +144,7 @@ public class YaraCompilerTest {
     public void testAddRulePackageSucceeds() throws Exception {
         final AtomicBoolean called = new AtomicBoolean();
 
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
@@ -175,11 +156,7 @@ public class YaraCompilerTest {
             Files.write(Paths.get(temp.getAbsolutePath()), "Hello world".getBytes(), StandardOpenOption.WRITE);
 
             try (YaraScanner scanner = compiler.createScanner()) {
-                scanner.setCallback(new YaraScanCallback() {
-                    @Override
-                    public void onMatch(YaraRule rule) {
-                    }
-                });
+                scanner.setCallback(rule -> {});
                 scanner.scan(temp);
             }
 
@@ -191,12 +168,7 @@ public class YaraCompilerTest {
     public void testAddRuleMultiLevelPackageSucceeds() throws Exception {
         final AtomicBoolean called = new AtomicBoolean();
 
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
@@ -208,11 +180,7 @@ public class YaraCompilerTest {
             Files.write(Paths.get(temp.getAbsolutePath()), "Hello world".getBytes(), StandardOpenOption.WRITE);
 
             try (YaraScanner scanner = compiler.createScanner()) {
-                scanner.setCallback(new YaraScanCallback() {
-                    @Override
-                    public void onMatch(YaraRule rule) {
-                    }
-                });
+                scanner.setCallback(rule -> {});
                 scanner.scan(temp);
             }
 
@@ -223,13 +191,10 @@ public class YaraCompilerTest {
     @Test
     public void testAddRulePackageFails() throws Exception {
         final AtomicBoolean called = new AtomicBoolean();
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                called.set(true);
-                LOGGER.log(Level.INFO, String.format("Compilation failed in %s at %d: %s",
-                        fileName, lineNumber, message));
-            }
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> {
+            called.set(true);
+            LOGGER.log(Level.INFO, String.format("Compilation failed in %s at %d: %s",
+                    fileName, lineNumber, message));
         };
 
         // Write test file
@@ -242,11 +207,7 @@ public class YaraCompilerTest {
             compiler.addRulesPackage(TestUtils.getResource("rules/two-levels.zip").toString(), null);
 
             try (YaraScanner scanner = compiler.createScanner()) {
-                scanner.setCallback(new YaraScanCallback() {
-                    @Override
-                    public void onMatch(YaraRule rule) {
-                    }
-                });
+                scanner.setCallback(rule -> {});
                 scanner.scan(temp);
             }
 
@@ -261,12 +222,7 @@ public class YaraCompilerTest {
 
     @Test
     public void testCreateScanner() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(callback);
@@ -280,12 +236,7 @@ public class YaraCompilerTest {
 
     @Test
     public void testAddRulesAfterScannerCreate() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         try (YaraCompiler compiler = new YaraCompilerImpl()) {
             compiler.setCallback(callback);

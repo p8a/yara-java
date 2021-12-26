@@ -1,10 +1,14 @@
 package com.github.plusvic.yara.external;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
  * User: pba
@@ -12,9 +16,9 @@ import static org.junit.Assert.*;
  * Time: 6:15 PM
  */
 public class LineTokenizerTest {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateNull() {
-        new LineTokenizer(null);
+        assertThrows(IllegalArgumentException.class, () ->new LineTokenizer(null));
     }
 
     @Test
@@ -300,7 +304,7 @@ public class LineTokenizerTest {
 
         assertEquals(new LineTokenizer.Token(LineTokenizer.TokenType.IDENTIFIER, "one"), tokens.next());
         assertEquals(new LineTokenizer.Token(LineTokenizer.TokenType.STRING, "this is a test"), tokens.next());
-        assertEquals(new LineTokenizer.Token(LineTokenizer.TokenType.STRING, "two"), tokens.next());;
+        assertEquals(new LineTokenizer.Token(LineTokenizer.TokenType.STRING, "two"), tokens.next());
 
         assertFalse(tokens.hasNext());
         assertEquals(LineTokenizer.EMPTY_TOKENS, tokenizer.next(LineTokenizer.TOKENS_ALL));

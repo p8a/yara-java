@@ -1,10 +1,13 @@
 package com.github.plusvic.yara.external;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
  * User: pba
@@ -12,14 +15,15 @@ import static org.junit.Assert.*;
  * Time: 8:55 AM
  */
 public class NativeExecutableTest {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateNoName() {
-        new NativeExecutable("");
+        assertThrows(IllegalArgumentException.class, () -> new NativeExecutable(""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateNullName() {
-        new NativeExecutable(null, NativeExecutableTest.class.getClassLoader());
+        assertThrows(IllegalArgumentException.class,
+            () -> new NativeExecutable(null, NativeExecutableTest.class.getClassLoader()));
     }
 
     @Test
