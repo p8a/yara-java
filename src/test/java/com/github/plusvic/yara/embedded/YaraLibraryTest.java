@@ -1,7 +1,7 @@
 package com.github.plusvic.yara.embedded;
 
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 

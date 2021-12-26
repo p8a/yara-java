@@ -1,11 +1,15 @@
 package com.github.plusvic.yara.embedded;
 
-import com.github.plusvic.yara.*;
+import com.github.plusvic.yara.TestUtils;
+import com.github.plusvic.yara.YaraCompilationCallback;
+import com.github.plusvic.yara.YaraCompiler;
+import com.github.plusvic.yara.YaraException;
+import com.github.plusvic.yara.YaraScanner;
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -16,7 +20,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * User: pba
@@ -56,12 +63,13 @@ public class YaraCompilerImplTest {
 
     private YaraImpl yara;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        System.out.println("assign yara");
         this.yara = new YaraImpl();
     }
 
-    @After
+    @AfterEach
     public void teardown() throws Exception {
         this.yara.close();
     }
@@ -87,12 +95,7 @@ public class YaraCompilerImplTest {
 
     @Test
     public void testAddRulesContentSucceeds() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(callback);
@@ -103,13 +106,9 @@ public class YaraCompilerImplTest {
     @Test
     public void testAddRulesContentFails() throws Exception {
         final AtomicBoolean called = new AtomicBoolean();
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                called.set(true);
-                LOGGER.log(Level.INFO, String.format("Compilation failed in %s at %d: %s",
-                        fileName, lineNumber, message));
-            }
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> {
+            called.set(true);
+            LOGGER.log(Level.INFO, String.format("Compilation failed in %s at %d: %s", fileName, lineNumber, message));
         };
 
         try (YaraCompiler compiler = yara.createCompiler()) {
@@ -235,12 +234,7 @@ public class YaraCompilerImplTest {
 
     @Test
     public void testCreateScanner() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(callback);
@@ -252,14 +246,10 @@ public class YaraCompilerImplTest {
         }
     }
 
-    @Ignore("yara asserts which stops execution")
+    @Test
+    @Disabled("yara asserts which stops execution")
     public void testAddRulesAfterScannerCreate() throws Exception {
-        YaraCompilationCallback callback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback callback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         try (YaraCompiler compiler = yara.createCompiler()) {
             compiler.setCallback(callback);

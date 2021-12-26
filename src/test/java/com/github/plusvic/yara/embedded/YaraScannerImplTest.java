@@ -2,12 +2,11 @@ package com.github.plusvic.yara.embedded;
 
 import com.github.plusvic.yara.*;
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -18,8 +17,14 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.easymock.EasyMock.createNiceMock;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+
 
 /**
  * User: pba
@@ -56,52 +61,43 @@ public class YaraScannerImplTest {
 
     private YaraImpl yara;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.yara = new YaraImpl();
     }
 
-    @After
+    @AfterEach
     public void teardown() throws Exception {
         yara.close();
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreateNoRules() throws IOException {
-        new YaraScannerImpl(createNiceMock(YaraLibrary.class), 0);
+    @Test
+    public void testCreateNoRules() {
+        assertThrows(IllegalArgumentException.class, () -> new YaraScannerImpl(mock(YaraLibrary.class), 0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateNoLibrary() {
-        new YaraScannerImpl(null, 1);
+        assertThrows(IllegalArgumentException.class, () -> new YaraScannerImpl(null, 1));
     }
 
     @Test
     public void testCreate() {
-        new YaraScannerImpl(createNiceMock(YaraLibrary.class), 1);
+        new YaraScannerImpl(mock(YaraLibrary.class), 1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWrongTimeout() {
-        new YaraScannerImpl(createNiceMock(YaraLibrary.class), 1).setTimeout(-1);
+        YaraScannerImpl impl = new YaraScannerImpl(mock(YaraLibrary.class), 1);
+        assertThrows(IllegalArgumentException.class, () -> impl.setTimeout(-1));
     }
 
     @Test
     public void testSetCallback() throws Exception {
         //
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
-
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
+        YaraScanCallback scanCallback = v -> {};
 
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
@@ -124,25 +120,17 @@ public class YaraScannerImplTest {
 
 
         //
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         final AtomicBoolean match = new AtomicBoolean();
 
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-                assertEquals("HelloWorld", v.getIdentifier());
-                assertMetas(v.getMetadata());
-                assertStrings(v.getStrings());
-                assertTags(v.getTags());
+        YaraScanCallback scanCallback = v -> {
+            assertEquals("HelloWorld", v.getIdentifier());
+            assertMetas(v.getMetadata());
+            assertStrings(v.getStrings());
+            assertTags(v.getTags());
 
-                match.set(true);
-            }
+            match.set(true);
         };
 
         // Create compiler and get scanner
@@ -173,23 +161,15 @@ public class YaraScannerImplTest {
 
 
         //
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         final AtomicInteger match = new AtomicInteger();
 
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-                assertMetas(v.getMetadata());
-                assertFalse(v.getStrings().next().getMatches().hasNext());
+        YaraScanCallback scanCallback = v -> {
+            assertMetas(v.getMetadata());
+            assertFalse(v.getStrings().next().getMatches().hasNext());
 
-                match.incrementAndGet();
-            }
+            match.incrementAndGet();
         };
 
         // Create compiler and get scanner
@@ -222,23 +202,14 @@ public class YaraScannerImplTest {
 
 
         //
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         final AtomicInteger match = new AtomicInteger();
 
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-                assertMetas(v.getMetadata());
-                assertFalse(v.getStrings().next().getMatches().hasNext());
-
-                match.incrementAndGet();
-            }
+        YaraScanCallback scanCallback = v -> {
+            assertMetas(v.getMetadata());
+            assertFalse(v.getStrings().next().getMatches().hasNext());
+            match.incrementAndGet();
         };
 
         // Create compiler and get scanner
@@ -268,21 +239,11 @@ public class YaraScannerImplTest {
 
 
         //
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         final AtomicBoolean match = new AtomicBoolean();
 
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-                match.set(true);
-            }
-        };
+        YaraScanCallback scanCallback = v -> match.set(true);
 
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
@@ -306,24 +267,14 @@ public class YaraScannerImplTest {
         File temp = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
         Files.write(Paths.get(temp.getAbsolutePath()), "Hello world".getBytes(), StandardOpenOption.WRITE);
 
-        Map<String, String> args = new HashMap();
+        Map<String, String> args = new HashMap<>();
         args.put("pe", temp.getAbsolutePath());
 
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         final AtomicBoolean match = new AtomicBoolean();
 
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-                match.set(true);
-            }
-        };
+        YaraScanCallback scanCallback = v -> match.set(true);
 
         // Create compiler and get scanner
         try (YaraCompiler compiler = yara.createCompiler()) {
@@ -346,24 +297,16 @@ public class YaraScannerImplTest {
         // Make test buffer
         byte[] buffer = "Hello world".getBytes();
 
-        YaraCompilationCallback compileCallback = new YaraCompilationCallback() {
-            @Override
-            public void onError(ErrorLevel errorLevel, String fileName, long lineNumber, String message) {
-                fail();
-            }
-        };
+        YaraCompilationCallback compileCallback = (errorLevel, fileName, lineNumber, message) -> fail();
 
         final AtomicBoolean match = new AtomicBoolean();
 
-        YaraScanCallback scanCallback = new YaraScanCallback() {
-            @Override
-            public void onMatch(YaraRule v) {
-                assertEquals("HelloWorld", v.getIdentifier());
-                assertMetas(v.getMetadata());
-                assertStrings(v.getStrings());
-                assertTags(v.getTags());
-                match.set(true);
-            }
+        YaraScanCallback scanCallback = v -> {
+            assertEquals("HelloWorld", v.getIdentifier());
+            assertMetas(v.getMetadata());
+            assertStrings(v.getStrings());
+            assertTags(v.getTags());
+            match.set(true);
         };
 
         // Create compiler and get scanner

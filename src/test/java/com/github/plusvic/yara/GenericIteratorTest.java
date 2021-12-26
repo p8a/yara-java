@@ -1,11 +1,15 @@
 package com.github.plusvic.yara;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * User: pba
@@ -97,7 +101,7 @@ public class GenericIteratorTest {
         assertEquals(size, count);
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void testNextFirst() {
         GenericIterator<String> it = new GenericIterator<String>() {
             private boolean used = false;
@@ -113,13 +117,13 @@ public class GenericIteratorTest {
         };
 
         assertNotNull(it.next());
-        assertNotNull(it.next());
+        Assertions.assertThrows(NoSuchElementException.class, it::next);
     }
 
     @Test
     public void testNextFirstMultiple() {
         GenericIterator<String> it = new GenericIterator<String>() {
-            private String values[] = new String[] { "one", "two"};
+            private final String[] values = new String[] { "one", "two"};
             private int pos = 0;
 
             @Override
