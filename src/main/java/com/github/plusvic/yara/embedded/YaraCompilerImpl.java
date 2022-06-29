@@ -36,7 +36,7 @@ public class YaraCompilerImpl implements YaraCompiler {
             this.callback = callback;
         }
 
-        long nativeOnError(long errorLevel, long fileName, long lineNumber, long message, long data) {
+        long nativeOnError(long errorLevel, long fileName, long lineNumber, long rule, long message, long data) {
             callback.onError(YaraCompilationCallback.ErrorLevel.from((int) errorLevel),
                     library.toString(fileName),
                     lineNumber,
@@ -71,7 +71,7 @@ public class YaraCompilerImpl implements YaraCompiler {
         checkArgument(cbk != null);
         checkState(callback == null);
 
-        callback = new Callback(new NativeCompilationCallback(library, cbk), "nativeOnError", 5);
+        callback = new Callback(new NativeCompilationCallback(library, cbk), "nativeOnError", 6);
         final long callBackAddress = callback.getAddress();
         if(callBackAddress == 0) {
           throw new IllegalStateException("Too many concurent callbacks, unable to create.");
